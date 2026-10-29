@@ -4,7 +4,7 @@ description: Produce narrated demo videos that sum up concepts, show UI updates 
 license: MIT
 compatibility: Needs uv and git; everything else (Python env, Chromium, ffmpeg, voice model) installs on first use.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Demo presentation
