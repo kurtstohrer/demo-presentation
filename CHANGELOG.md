@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 — 2026-10-29
+
+- New `chat` scene type: someone prompting an agent. The user's message is typed into a
+  message box and sent, replies stream in, and the commands the agent runs show as rows
+  with their result (`user`, `agent`, `thinking`, `tool`, `clear`). Neutral look, both
+  themes; see `references/script-format.md` and `examples/agent-chat.json`.
+- The validator checks chat actions; the review UI's timeline colours chat scenes.
+
 ## 1.1.0 — 2026-10-29
 
 - Captions go into `final.mp4` as a soft subtitle track (`mov_text`, English) that

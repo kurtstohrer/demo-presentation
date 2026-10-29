@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
-SCENE_TYPES = ("whiteboard", "terminal", "code", "ui", "card")
+SCENE_TYPES = ("whiteboard", "terminal", "code", "chat", "ui", "card")
 WORDS_PER_SECOND = 2.6
 
 
@@ -95,7 +95,19 @@ def validate_script(script) -> list[str]:
             for a in actions:
                 if not isinstance(a, dict):
                     problems.append(f"{where} beats[{bi}]: each action must be an object")
+                elif scene.get("type") == "chat":
+                    problems += chat_action_problems(a, f"{where} beats[{bi}]")
     return problems
+
+
+def chat_action_problems(a: dict, where: str) -> list[str]:
+    if "user" in a and not isinstance(a["user"], str):
+        return [f"{where}: chat user must be a string"]
+    if "agent" in a and not (isinstance(a["agent"], str) or isinstance(a["agent"], dict) and isinstance(a["agent"].get("text"), str)):
+        return [f"{where}: chat agent must be a string or {{text}}"]
+    if "tool" in a and not (isinstance(a["tool"], str) or isinstance(a["tool"], dict) and isinstance(a["tool"].get("name"), str)):
+        return [f"{where}: chat tool must be a string or {{name}}"]
+    return []
 
 
 def load_run(run_dir: str | Path) -> tuple[Path, dict, dict]:

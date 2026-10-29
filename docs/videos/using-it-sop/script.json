@@ -32,7 +32,7 @@
       "title": "Seven steps",
       "beats": [
         {
-          "say": "This is how to use demo-presentation, from install to a reviewed video, in seven steps.",
+          "say": "Here's demo-presentation in seven steps, from install to a reviewed video. Your machine needs only uv and git.",
           "do": [
             {
               "title": "Seven steps"
@@ -50,7 +50,7 @@
                 "y": 240,
                 "w": 780,
                 "size": 60,
-                "stagger": 450
+                "stagger": 400
               }
             },
             {
@@ -65,14 +65,9 @@
                 "y": 240,
                 "w": 800,
                 "size": 60,
-                "stagger": 450
+                "stagger": 400
               }
-            }
-          ]
-        },
-        {
-          "say": "Your machine needs only uv and git. Python, Chromium, ffmpeg and the voice install on first use.",
-          "do": [
+            },
             {
               "note": {
                 "id": "deps",
@@ -92,54 +87,31 @@
       "type": "terminal",
       "title": "Step 1 · Install",
       "windowTitle": "install",
+      "typeMs": 26,
       "beats": [
         {
-          "say": "Step one: install the skill. In Claude Code, it's a plugin, and this repo is its own marketplace.",
+          "say": "Step one: install it. In Claude Code it's a plugin. Other agents use npx skills, or unzip the release.",
           "do": [
-            {
-              "comment": "Claude Code plugin (or /plugin install … at its prompt)"
-            },
             {
               "type": "claude plugin install demo-presentation --marketplace kurtstohrer/demo-presentation",
               "output": ""
-            }
-          ]
-        },
-        {
-          "say": "Any other agent that reads SKILL.md files can add it with npx skills.",
-          "do": [
-            {
-              "comment": "any agent that reads SKILL.md"
             },
             {
               "type": "npx skills add kurtstohrer/demo-presentation",
               "output": ""
+            },
+            {
+              "type": "unzip demo-presentation-v1.2.0.zip -d path/to/skills/",
+              "output": ""
             }
           ]
         },
         {
-          "say": "Or download the zip from the releases page, and unzip it into your agent's skills folder.",
+          "say": "You end up with this folder: the skill file, its command line, and the scene renderers.",
           "do": [
             {
-              "comment": "or by hand: unzip the release into your skills folder"
+              "clear": true
             },
-            {
-              "type": "unzip demo-presentation-v1.0.0.zip -d path/to/skills/",
-              "output": ""
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "skill-dir",
-      "type": "terminal",
-      "title": "Step 1 · Install",
-      "windowTitle": "demo-presentation",
-      "beats": [
-        {
-          "say": "Whichever way you choose, you end up with this folder: the skill file, the command line in scripts, and the scene renderers.",
-          "do": [
             {
               "run": "ls skills/demo-presentation",
               "maxLines": 16
@@ -154,7 +126,7 @@
       "title": "Step 2 · Set up .demo/",
       "beats": [
         {
-          "say": "Step two: give your project a .demo folder. Its config.toml sets the theme and the voice.",
+          "say": "Step two: give your project a .demo folder. Its config.toml sets the theme, the voice, and a lexicon for words the voice gets wrong.",
           "do": [
             {
               "open": ".demo/config.toml",
@@ -168,12 +140,10 @@
                 1,
                 5
               ]
-            }
-          ]
-        },
-        {
-          "say": "The lexicon fixes words the voice would get wrong, like ffmpeg and uv.",
-          "do": [
+            },
+            {
+              "wait": 2200
+            },
             {
               "focus": [
                 14,
@@ -189,7 +159,7 @@
           ]
         },
         {
-          "say": "A web app also sets a base URL, and the services to start before recording. Here, that's a small sample app.",
+          "say": "A web app also sets a base URL, and the services to start before recording.",
           "do": [
             {
               "focus": [
@@ -213,7 +183,7 @@
       "title": "Step 2 · Set up .demo/",
       "beats": [
         {
-          "say": "brief.md tells the agent what it may show: routes, selectors, safe commands, and what never goes on camera. The agent reads it before it plans a single scene.",
+          "say": "brief.md tells the agent what it may show, and what never goes on camera. Keep the runs folder out of git; videos don't belong in the repo.",
           "do": [
             {
               "open": ".demo/brief.md",
@@ -227,22 +197,15 @@
                 6,
                 26
               ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "gitignore",
-      "type": "terminal",
-      "title": "Step 2 · Set up .demo/",
-      "beats": [
-        {
-          "say": "Then make sure git ignores the runs and local folders. Videos never belong in the repo.",
-          "do": [
+            },
             {
-              "run": "grep -n demo .gitignore",
-              "maxLines": 6
+              "wait": 3000
+            },
+            {
+              "focus": [
+                28,
+                32
+              ]
             }
           ]
         }
@@ -250,26 +213,26 @@
     },
     {
       "id": "ask",
-      "type": "terminal",
+      "type": "chat",
       "title": "Step 3 · Ask for a video",
       "windowTitle": "your agent",
-      "prompt": "> ",
       "beats": [
         {
           "say": "Step three: ask your agent for a video, in plain words.",
           "do": [
             {
-              "type": "make a demo video of the new settings page",
-              "output": ""
+              "user": "make a demo video of the new settings page"
             }
           ]
         },
         {
-          "say": "Name the feature, the PR, or the idea. Say outline first if you want to approve a plan before it records.",
+          "say": "It reads your brief and says what it will do. Ask for an outline first if you want to approve a plan.",
           "do": [
             {
-              "type": "record a walkthrough of this PR, outline first",
-              "output": ""
+              "thinking": 900
+            },
+            {
+              "agent": "I'll read `.demo/brief.md`, write a script, check a storyboard frame by frame, then record it."
             }
           ]
         }
@@ -277,183 +240,69 @@
     },
     {
       "id": "agent",
-      "type": "whiteboard",
+      "type": "chat",
       "title": "Step 4 · What the agent does",
-      "beats": [
+      "windowTitle": "your agent",
+      "prepare": [
         {
-          "say": "Step four is the agent's job. It creates a run with demo new, and writes the script.",
-          "do": [
-            {
-              "title": "What the agent does"
-            },
-            {
-              "box": {
-                "id": "new",
-                "text": "demo new",
-                "x": 100,
-                "y": 400,
-                "w": 300,
-                "h": 140
-              }
-            },
-            {
-              "text": {
-                "id": "new-t",
-                "text": "a run folder",
-                "x": 100,
-                "y": 560,
-                "w": 300,
-                "size": 38,
-                "align": "center"
-              }
-            },
-            {
-              "box": {
-                "id": "write",
-                "text": "write script",
-                "x": 460,
-                "y": 400,
-                "w": 300,
-                "h": 140,
-                "color": "accent"
-              }
-            },
-            {
-              "text": {
-                "id": "write-t",
-                "text": "scenes + beats",
-                "x": 460,
-                "y": 560,
-                "w": 300,
-                "size": 38,
-                "align": "center"
-              }
-            },
-            {
-              "arrow": {
-                "from": "new",
-                "to": "write"
-              }
-            }
-          ]
+          "user": "make a demo video of the new settings page"
         },
         {
-          "say": "Then demo storyboard renders one frame per beat in seconds, and the agent checks every frame itself.",
-          "do": [
-            {
-              "box": {
-                "id": "sb",
-                "text": "storyboard",
-                "x": 820,
-                "y": 400,
-                "w": 300,
-                "h": 140,
-                "color": "accent-2"
-              }
-            },
-            {
-              "text": {
-                "id": "sb-t",
-                "text": "one frame per beat",
-                "x": 820,
-                "y": 560,
-                "w": 300,
-                "size": 38,
-                "align": "center"
-              }
-            },
-            {
-              "arrow": {
-                "from": "write",
-                "to": "sb"
-              }
-            },
-            {
-              "note": {
-                "id": "fix",
-                "text": "check every frame, fix, repeat",
-                "x": 700,
-                "y": 700,
-                "w": 540,
-                "tilt": 1.5
-              }
-            }
-          ]
-        },
-        {
-          "say": "Only then does demo build narrate, record in real time, and stitch the final video.",
-          "do": [
-            {
-              "box": {
-                "id": "build",
-                "text": "demo build",
-                "x": 1180,
-                "y": 400,
-                "w": 300,
-                "h": 140,
-                "color": "good"
-              }
-            },
-            {
-              "text": {
-                "id": "build-t",
-                "text": "narrate · record · stitch",
-                "x": 1150,
-                "y": 560,
-                "w": 360,
-                "size": 38,
-                "align": "center"
-              }
-            },
-            {
-              "arrow": {
-                "from": "sb",
-                "to": "build"
-              }
-            },
-            {
-              "ellipse": {
-                "id": "mp4",
-                "text": "final.mp4",
-                "x": 1540,
-                "y": 400,
-                "w": 280,
-                "h": 140,
-                "color": "good"
-              }
-            },
-            {
-              "arrow": {
-                "from": "build",
-                "to": "mp4"
-              }
-            }
-          ]
+          "agent": {
+            "text": "I'll read `.demo/brief.md`, write a script, check a storyboard frame by frame, then record it.",
+            "ms": 1
+          }
         }
-      ]
-    },
-    {
-      "id": "agent-cli",
-      "type": "terminal",
-      "title": "Step 4 · What the agent does",
-      "cwd": "skills/demo-presentation",
-      "windowTitle": "skills/demo-presentation",
+      ],
       "beats": [
         {
-          "say": "Here's a finished run. It holds the script, the storyboard, the scene clips and the final video.",
+          "say": "Step four is the agent's job. It creates a run, writes the script, and validates it.",
           "do": [
             {
-              "run": "ls $(scripts/demo path how-it-works)",
-              "maxLines": 16
+              "tool": {
+                "name": "demo new settings",
+                "result": ".demo/runs/settings"
+              }
+            },
+            {
+              "tool": {
+                "name": "write script.json",
+                "result": "6 scenes · 21 beats",
+                "ms": 1500
+              }
+            },
+            {
+              "tool": {
+                "name": "demo validate settings",
+                "result": "ok"
+              }
             }
           ]
         },
         {
-          "say": "And validate checks a script before anything is rendered.",
+          "say": "Then it renders a storyboard, one frame per beat, and checks every frame itself before it records.",
           "do": [
             {
-              "run": "scripts/demo validate how-it-works",
-              "maxLines": 4
+              "tool": {
+                "name": "demo storyboard settings",
+                "result": "21 frames checked",
+                "ms": 1800
+              }
+            }
+          ]
+        },
+        {
+          "say": "Only then does it build: narrate, record in real time, and stitch the video. And it sends you the link.",
+          "do": [
+            {
+              "tool": {
+                "name": "demo build settings",
+                "result": "final.mp4 · 1:42",
+                "ms": 2200
+              }
+            },
+            {
+              "agent": "Done. Review it here: `http://127.0.0.1:4179/#/run/settings`"
             }
           ]
         }
@@ -479,19 +328,14 @@
           ]
         },
         {
-          "say": "It drives a real browser, and clicks through to the settings page like a person would.",
+          "say": "It drives a real browser, clicks through to settings like a person would, and spotlights what the narration is about.",
           "do": [
             {
               "click": "header nav >> text=Settings"
             },
             {
               "waitFor": "#notifications"
-            }
-          ]
-        },
-        {
-          "say": "A spotlight points at whatever the narration is talking about.",
-          "do": [
+            },
             {
               "spotlight": {
                 "selector": "#notifications",
@@ -987,31 +831,43 @@
       ]
     },
     {
-      "id": "review-cli",
-      "type": "terminal",
+      "id": "feedback",
+      "type": "chat",
       "title": "Step 5 · Review",
-      "cwd": "skills/demo-presentation",
-      "windowTitle": "skills/demo-presentation",
+      "windowTitle": "your agent",
       "beats": [
         {
-          "say": "The agent reads your comments with demo review. Each one is mapped to its beat.",
+          "say": "Then tell your agent you left feedback. It reads every comment with demo review, mapped to its beat.",
           "do": [
             {
-              "run": "scripts/demo review ui-sample",
-              "maxLines": 12
+              "user": "I left comments on the video"
+            },
+            {
+              "tool": {
+                "name": "demo review ui-sample",
+                "result": "2 comments · 1 change request"
+              }
             }
           ]
         },
         {
-          "say": "It edits the script, re-renders only the scenes that changed, replies to every comment, and sends you the link again.",
+          "say": "It edits the script, re-renders only what changed, replies to each comment, and sends the link again.",
           "do": [
             {
-              "type": "scripts/demo build ui-sample --scene log",
-              "output": "narration: 1 generated, 2 cached\nscene log (terminal)\n  $ cat CHANGELOG.md\nversion 3\nfinal video: .demo/runs/ui-sample/final.mp4 (13.4s, 4 captions in a subtitle track, 2 scenes)"
+              "tool": {
+                "name": "demo build ui-sample --scene idea,log",
+                "result": "2 scenes re-rendered",
+                "ms": 1800
+              }
             },
             {
-              "type": "scripts/demo review ui-sample --reply cb07c0d \"Added the version.\"",
-              "output": "cb07c0d: addressed"
+              "tool": {
+                "name": "demo review ui-sample --reply …",
+                "result": "3 replies"
+              }
+            },
+            {
+              "agent": "Made the arrow label bigger, said the file name out loud, and added the version. Same link as before."
             }
           ]
         }
@@ -1023,7 +879,7 @@
       "title": "Step 6 · Publish (optional)",
       "beats": [
         {
-          "say": "Step six is optional. If your team keeps videos somewhere else, add a publish command to config.toml.",
+          "say": "Step six is optional: add a publish command to config.toml, and demo publish sends the video wherever your team keeps them.",
           "do": [
             {
               "open": ".demo/config.toml",
@@ -1036,17 +892,6 @@
               "focus": [
                 35,
                 38
-              ]
-            }
-          ]
-        },
-        {
-          "say": "demo publish runs it with the video, captions and title in environment variables, and the agent passes on whatever it prints.",
-          "do": [
-            {
-              "highlight": [
-                36,
-                36
               ]
             },
             {
@@ -1076,22 +921,14 @@
           ]
         },
         {
-          "say": "If screenshots fail with unable to capture, add the software GL flag to storyboard and build.",
+          "say": "If screenshots fail, add the software GL flag. If a UI scene times out, storyboard it headed to watch the browser.",
           "do": [
             {
-              "comment": "\"Unable to capture screenshot\": render without the GPU"
+              "clear": true
             },
             {
               "type": "scripts/demo build my-video --software-gl",
               "output": ""
-            }
-          ]
-        },
-        {
-          "say": "And if a UI scene times out, storyboard it with the headed flag to watch the browser, and check the selector.",
-          "do": [
-            {
-              "comment": "a UI scene times out: watch it in a real window"
             },
             {
               "type": "scripts/demo storyboard my-video --headed",

@@ -1,0 +1,30 @@
+{
+  "title": "Asking an agent for a video",
+  "voice": "af_heart",
+  "scenes": [
+    {
+      "id": "ask",
+      "type": "chat",
+      "title": "Ask for it",
+      "beats": [
+        {
+          "say": "You ask your agent in plain words.",
+          "do": [{ "user": "make a demo video of the new settings page" }]
+        },
+        {
+          "say": "It says what it will do, checks a storyboard, then records.",
+          "do": [
+            { "thinking": 900 },
+            { "agent": "I'll write a script, check a storyboard frame by frame, then record it." },
+            { "tool": { "name": "demo storyboard settings", "result": "9 frames" } },
+            { "tool": { "name": "demo build settings", "result": "final.mp4 · 1:42", "ms": 1600 } }
+          ]
+        },
+        {
+          "say": "And it hands you a link to review the video.",
+          "do": [{ "agent": "Done. Review it with `demo url settings`, then tell me what to change." }]
+        }
+      ]
+    }
+  ]
+}

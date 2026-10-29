@@ -181,6 +181,7 @@ function focus(c: Comment) { activeId.value = c.id; if (c.t != null) seek(c.t) }
 .seg[data-type='whiteboard'] { background: rgb(var(--x-fill) / 0.35); }
 .seg[data-type='terminal'] { background: rgb(var(--y-fill) / 0.35); }
 .seg[data-type='code'] { background: rgb(var(--b-fill) / 0.35); }
+.seg[data-type='chat'] { background: rgb(var(--b-fill) / 0.2); }
 .seg[data-type='ui'] { background: rgb(var(--accent) / 0.35); }
 .tick { position: absolute; top: 40px; width: 1px; height: 6px; background: rgb(var(--text-muted)); }
 .pin { position: absolute; top: 0; width: 14px; height: 14px; margin-left: -7px; padding: 0; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);

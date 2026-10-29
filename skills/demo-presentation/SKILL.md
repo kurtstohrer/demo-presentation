@@ -1,6 +1,6 @@
 ---
 name: demo-presentation
-description: Produce narrated demo videos that sum up concepts, show UI updates and walk through features. Scenes are a hand-drawn whiteboard, a terminal running real commands, a code editor showing real files, and live Playwright UI walkthroughs, with a title card when the project sets a logo; narration is Kokoro TTS and ffmpeg stitches the result with captions and chapters. Records the video straight away (headless is fine; an outline goes to the user first only when they ask for one), then hands over a local review link where the user comments on the video, or runs the project's own publish command; where nothing can be recorded, it says "no demo possible here" instead of faking one. Use for "make a demo video", "record a walkthrough", "explain this feature in a video", "show what changed in the UI".
+description: Produce narrated demo videos that sum up concepts, show UI updates and walk through features. Scenes are a hand-drawn whiteboard, a terminal running real commands, a code editor showing real files, a chat showing someone prompting an agent, and live Playwright UI walkthroughs, with a title card when the project sets a logo; narration is Kokoro TTS and ffmpeg stitches the result with captions and chapters. Records the video straight away (headless is fine; an outline goes to the user first only when they ask for one), then hands over a local review link where the user comments on the video, or runs the project's own publish command; where nothing can be recorded, it says "no demo possible here" instead of faking one. Use for "make a demo video", "record a walkthrough", "explain this feature in a video", "show what changed in the UI".
 license: MIT
 compatibility: Needs uv and git; everything else (Python env, Chromium, ffmpeg, voice model) installs on first use.
 metadata:
@@ -24,12 +24,12 @@ Files:
   itself to `~/.cache/demo-presentation/` and installs one Python env there;
   the skill folder in the repo is never modified.
 - `scripts/` — `record.py` (Playwright), `tts.py` (Kokoro ONNX), `stitch.py` (ffmpeg)
-- `scenes/` — HTML renderers for whiteboard / terminal / code / card scenes; `vendor/` their fonts and libraries
+- `scenes/` — HTML renderers for whiteboard / terminal / code / chat / card scenes; `vendor/` their fonts and libraries
 - `references/script-format.md` — **the full `script.json` action reference**
 - `references/environment.md` — headless recording, hard dependencies, remote machines
 - `scripts/serve.py` + `ui/` — review web UI (`demo url`); `scripts/review.py` — agent side (`demo review`)
 - `.demo/pronunciations.json` in the project — the pronunciation library (step 4)
-- `examples/` — working scripts (`skill-tour.json`: whiteboard/terminal/code; `ui-walkthrough.json`: UI)
+- `examples/` — working scripts (`skill-tour.json`: whiteboard/terminal/code; `ui-walkthrough.json`: UI; `agent-chat.json`: chat)
 - runs: `<repo>/.demo/runs/<name>/` — one directory per video (add `.demo/runs/` and
   `.demo/local/` to the project's `.gitignore`)
 
@@ -92,6 +92,8 @@ Write scenes and beats per `references/script-format.md`. Guidelines:
   Prefer stable selectors from the brief.
 - Terminal scenes: only fast, read-only commands. Use `maxLines`.
 - Code scenes: show 20–40 relevant lines with `lines`, then `focus` ranges.
+- Chat scenes: for how a user asks an agent for something. Script the real prompt
+  and the real steps; keep replies to a sentence or two.
 
 ```bash
 demo validate <name>

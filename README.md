@@ -4,7 +4,8 @@ An agent skill that turns a topic (a feature, a PR, a concept) into a 1–5 minu
 MP4, then hands you a local review page to comment on it.
 
 - **Scenes:** a hand-drawn whiteboard, a terminal running real commands, a code editor
-  showing real files, live Playwright walkthroughs of your app, and title cards.
+  showing real files, a chat of someone prompting an agent, live Playwright walkthroughs
+  of your app, and title cards.
 - **Narration:** Kokoro TTS on CPU, with a per-project pronunciation library.
 - **Output:** `final.mp4` with a captions track you can switch on, chapters, and a timeline that
   maps every beat to its time in the video.

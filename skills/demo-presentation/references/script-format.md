@@ -99,6 +99,27 @@ Editor window with Shiki highlighting.
 Line numbers are file line numbers. After an `insert`, later lines shift down.
 Scene options: `title`, `subtitle`, `fontSize=22`, `typeMs=22`.
 
+## chat
+
+A conversation with an agent: the user's prompt is typed into a message box and sent,
+the agent's replies stream in, and the commands it runs show as rows with a result.
+The window is neutral: no product's look or name. Everything in it is scripted, so
+write what really happens: the user's real request and the steps the agent really
+takes (`demo storyboard`, `demo build`), never a capability the agent lacks.
+
+| action | value |
+|---|---|
+| `user` | `"text"` — typed into the message box, then sent as a bubble |
+| `agent` | `"text"` or `{ text, ms=45 }` — streams in word by word (`ms` per word). Inline `` `code` ``, `**bold**`, `- ` lists, blank-line paragraphs |
+| `thinking` | `ms` — typing indicator for that long |
+| `tool` | `"command"` or `{ name, result, ms=1100, failed }` — a running row that turns into a check (or a red mark) with `result` |
+| `clear` | `true` |
+| `heading` / `subheading` / `wait` | shared actions |
+
+Scene options: `title`, `subtitle`, `windowTitle="chat"`, `agentName="Agent"`,
+`placeholder`, `fontSize=28`, `typeMs=34`, `streamMs=45`. About eight messages fit
+on screen; older ones scroll up.
+
 ## card
 
 A title card: the project's logo, a big title and a subtitle over the theme's

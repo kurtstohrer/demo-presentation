@@ -35,6 +35,24 @@ class ValidateScript(unittest.TestCase):
             self.assertTrue(any(needle in p for p in problems), needle)
         self.assertEqual(common.validate_script([]), ['script must be an object'])
 
+    def test_chat_scene(self):
+        chat = {'title': 't', 'scenes': [{'id': 'ask', 'type': 'chat', 'beats': [
+            {'say': 'hi', 'do': [{'user': 'make a video'}, {'thinking': 500}, {'agent': 'On it.'},
+                                 {'agent': {'text': 'Done.', 'ms': 30}}, {'tool': {'name': 'demo build x', 'result': 'ok'}}, {'tool': 'ls'}]}]}]}
+        self.assertEqual(common.validate_script(chat), [])
+        chat['scenes'][0]['beats'][0]['do'] = [{'user': 3}, {'agent': {'ms': 3}}, {'tool': {}}]
+        problems = common.validate_script(chat)
+        for needle in ('chat user must be a string', 'chat agent must be', 'chat tool must be'):
+            self.assertTrue(any(needle in p for p in problems), needle)
+
+    def test_every_html_scene_type_has_a_renderer_and_examples_validate(self):
+        skill = ROOT / 'skills/demo-presentation'
+        for t in common.SCENE_TYPES:
+            if t != 'ui':
+                self.assertTrue((skill / 'scenes' / f'{t}.html').is_file(), t)
+        for ex in (skill / 'examples').glob('*.json'):
+            self.assertEqual(common.validate_script(json.loads(ex.read_text())), [], ex.name)
+
     def test_cli_on_a_run_dir(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / 'script.json').write_text(json.dumps(GOOD))
