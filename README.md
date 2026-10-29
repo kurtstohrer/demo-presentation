@@ -15,27 +15,19 @@ MP4, then hands you a local review page to comment on it.
 It needs only `uv` and `git`. Python, Chromium, ffmpeg and the voice model install on first
 use (~1.3 GB, once).
 
-## Videos
+## Video
 
-Both were made with this skill, from the scripts in [`docs/videos/`](docs/videos/). The
-captions are a subtitle track: switch them on in your player, or get the
-[`.srt`](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.srt) files from the
-[media release](https://github.com/kurtstohrer/demo-presentation/releases/tag/media).
+**How demo-presentation works** (2:32), made with this skill from
+[`docs/videos/how-it-works/script.json`](docs/videos/how-it-works/script.json): the
+pipeline from `script.json` to MP4, the five scene types, and the review loop.
 
-[![How demo-presentation works](docs/media/how-it-works.png)](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4)
+https://github.com/user-attachments/assets/1fc93bf7-c9de-49d0-9201-6a8ad8872785
 
-**[How demo-presentation works](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4)** (2:32): the pipeline from
-`script.json` to MP4, the five scene types, and the review loop.
 0:00 What it makes · 0:18 The pipeline · 0:48 A script · 1:06 Five scene types ·
 1:28 Terminal scenes · 1:37 The review page · 2:05 The review loop · 2:18 Recap
 
-[![Using demo-presentation, step by step](docs/media/using-it-sop.png)](https://github.com/kurtstohrer/demo-presentation/releases/download/media/using-it-sop.mp4)
-
-**[Using demo-presentation, step by step](https://github.com/kurtstohrer/demo-presentation/releases/download/media/using-it-sop.mp4)** (5:07): install, set up
-`.demo/`, ask for a video, review it in the browser, publish, troubleshoot.
-0:00 Seven steps · 0:14 Install · 0:48 Set up .demo/ · 1:28 Ask for a video ·
-1:39 What the agent does · 2:45 Review · 4:20 Publish (optional) · 4:36 Troubleshooting ·
-4:59 Recap
+Captions: download the [MP4](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4) (it has a subtitle track) or the
+[`.srt`](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.srt).
 
 ## Install
 
