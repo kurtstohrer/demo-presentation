@@ -6,14 +6,36 @@ MP4, then hands you a local review page to comment on it.
 - **Scenes:** a hand-drawn whiteboard, a terminal running real commands, a code editor
   showing real files, live Playwright walkthroughs of your app, and title cards.
 - **Narration:** Kokoro TTS on CPU, with a per-project pronunciation library.
-- **Output:** `final.mp4` with burned-in captions, chapters, and a timeline that maps every
-  beat to its time in the video.
+- **Output:** `final.mp4` with a captions track you can switch on, chapters, and a timeline that
+  maps every beat to its time in the video.
 - **Review:** a local web UI with the video, a live transcript, comments pinned to times and
   screen regions, script and storyboard editing, and re-render buttons. The agent reads
   your feedback with `demo review` and re-renders only what changed.
 
 It needs only `uv` and `git`. Python, Chromium, ffmpeg and the voice model install on first
 use (~1.3 GB, once).
+
+## Videos
+
+Both were made with this skill, from the scripts in [`docs/videos/`](docs/videos/). The
+captions are a subtitle track: switch them on in your player, or get the
+[`.srt`](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.srt) files from the
+[media release](https://github.com/kurtstohrer/demo-presentation/releases/tag/media).
+
+[![How demo-presentation works](docs/media/how-it-works.png)](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4)
+
+**[How demo-presentation works](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4)** (2:32): the pipeline from
+`script.json` to MP4, the five scene types, and the review loop.
+0:00 What it makes · 0:18 The pipeline · 0:48 A script · 1:06 Five scene types ·
+1:28 Terminal scenes · 1:37 The review page · 2:05 The review loop · 2:18 Recap
+
+[![Using demo-presentation, step by step](docs/media/using-it-sop.png)](https://github.com/kurtstohrer/demo-presentation/releases/download/media/using-it-sop.mp4)
+
+**[Using demo-presentation, step by step](https://github.com/kurtstohrer/demo-presentation/releases/download/media/using-it-sop.mp4)** (5:07): install, set up
+`.demo/`, ask for a video, review it in the browser, publish, troubleshoot.
+0:00 Seven steps · 0:14 Install · 0:48 Set up .demo/ · 1:28 Ask for a video ·
+1:39 What the agent does · 2:45 Review · 4:20 Publish (optional) · 4:36 Troubleshooting ·
+4:59 Recap
 
 ## Install
 
@@ -37,11 +59,23 @@ agent's skills directory, or copy `skills/demo-presentation/` from a checkout.
 
 ## Use
 
-Ask your agent for a video: *"make a demo video of the new settings page"*, *"record a
-walkthrough of this PR"*. The skill writes a `script.json`, checks a storyboard, records,
-and gives you the review link.
+1. **Set up `.demo/`** at your project's root (see [Project settings](#project-settings)):
+   `config.toml` with your app's `base_url` and how to start it, and `brief.md` saying
+   what the agent may show. Add `.demo/runs/` and `.demo/local/` to `.gitignore`.
+2. **Ask your agent for a video:** *"make a demo video of the new settings page"*,
+   *"record a walkthrough of this PR"*.
+3. **The agent does the rest:** `demo new`, writes `script.json`, checks a storyboard
+   frame by frame, then `demo build`, and gives you the review link.
+4. **Review it** at `demo url <run>`: comment on a moment (press C, mark a region),
+   fix pronunciations, edit narration and request changes per scene. Tell the agent when
+   you're done; it reads everything with `demo review <run>` and re-renders only what
+   changed.
+5. **Publish (optional):** `demo publish <run>` runs your `[publish] command`.
 
-The CLI behind it is `skills/demo-presentation/scripts/demo`:
+If something fails, `demo doctor` shows what is installed. If browser screenshots fail,
+try `demo storyboard` or `demo build` with `--software-gl`.
+
+The CLI is `skills/demo-presentation/scripts/demo`:
 
 ```bash
 demo doctor               # what is installed, what will install on first use

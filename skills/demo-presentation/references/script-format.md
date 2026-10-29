@@ -9,7 +9,7 @@ lands next to it (`audio/`, `storyboard/`, `scenes/`, `final.mp4`, ...).
   "voice": "af_heart",                    // Kokoro voice (see `demo voices`); a* = US, b* = UK
   "speed": 1.0,                           // narration speed
   "theme": "dark",                        // dark | light: HTML scenes + colorScheme
-  "captions": true,                       // burn captions into final.mp4 (captions.srt is always written)
+  "captions": true,                       // caption track in final.mp4, switchable in the player (captions.srt is always written)
   "lexicon": { "CLI": "C L I", "Kokoro": "/kˈOkəɹO/" }, // spoken substitutions (respelling or /IPA/); captions keep the original.
                                           // The project library .demo/pronunciations.json overrides these per word.
   "baseUrl": "http://localhost:3000",     // prefix for relative ui scene urls

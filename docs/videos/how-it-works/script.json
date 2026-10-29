@@ -1,0 +1,744 @@
+{
+  "title": "How demo-presentation works",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "theme": "dark",
+  "captions": true,
+  "lexicon": {
+    "CLI": "C L I",
+    "TTS": "T T S",
+    "JSON": "jason",
+    "TOML": "tommel",
+    "MP4": "M P 4",
+    "uv": "you vee",
+    "npx": "N P X",
+    "ffmpeg": "eff eff em peg",
+    "Kokoro": "/kˈOkəɹO/",
+    "Playwright": "play wright",
+    "SKILL.md": "skill dot M D",
+    "script.json": "script dot jason",
+    "config.toml": "config dot tommel",
+    "brief.md": "brief dot M D",
+    "UI": "U I",
+    "SOP": "S O P",
+    "PR": "P R",
+    "gitignore": "git ignore"
+  },
+  "scenes": [
+    {
+      "id": "what",
+      "type": "whiteboard",
+      "title": "What it makes",
+      "beats": [
+        {
+          "say": "demo-presentation is an agent skill that turns a topic into a short narrated video.",
+          "do": [
+            {
+              "title": "What it makes"
+            },
+            {
+              "box": {
+                "id": "topic",
+                "text": "A topic",
+                "x": 140,
+                "y": 470,
+                "w": 360,
+                "h": 160
+              }
+            },
+            {
+              "text": {
+                "id": "topic-eg",
+                "text": "a feature, a PR, a concept",
+                "x": 100,
+                "y": 660,
+                "w": 440,
+                "size": 38,
+                "align": "center",
+                "color": "accent-2"
+              }
+            },
+            {
+              "box": {
+                "id": "agent",
+                "text": "Your agent",
+                "x": 780,
+                "y": 470,
+                "w": 360,
+                "h": 160,
+                "color": "accent"
+              }
+            },
+            {
+              "arrow": {
+                "from": "topic",
+                "to": "agent"
+              }
+            }
+          ]
+        },
+        {
+          "say": "You ask for a video, and you get an MP4 with captions and chapters, plus a local page to review it.",
+          "do": [
+            {
+              "box": {
+                "id": "mp4",
+                "text": "final.mp4",
+                "x": 1420,
+                "y": 350,
+                "w": 360,
+                "h": 150,
+                "color": "good"
+              }
+            },
+            {
+              "box": {
+                "id": "page",
+                "text": "review page",
+                "x": 1420,
+                "y": 650,
+                "w": 360,
+                "h": 150,
+                "color": "good"
+              }
+            },
+            {
+              "arrow": {
+                "from": "agent",
+                "to": "mp4"
+              }
+            },
+            {
+              "arrow": {
+                "from": "agent",
+                "to": "page"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Everything on screen is real: real commands, real files, and your real app.",
+          "do": [
+            {
+              "note": {
+                "id": "real",
+                "text": "nothing faked",
+                "x": 820,
+                "y": 770,
+                "w": 300,
+                "tilt": -2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "type": "whiteboard",
+      "title": "The pipeline",
+      "beats": [
+        {
+          "say": "Here is the pipeline. The agent writes a script.json file, made of scenes, and each scene is a list of beats.",
+          "do": [
+            {
+              "title": "The pipeline"
+            },
+            {
+              "box": {
+                "id": "script",
+                "text": "script.json",
+                "x": 100,
+                "y": 450,
+                "w": 300,
+                "h": 140
+              }
+            },
+            {
+              "text": {
+                "id": "script-t",
+                "text": "scenes, then beats",
+                "x": 100,
+                "y": 610,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "box": {
+                "id": "beats",
+                "text": "beat",
+                "x": 460,
+                "y": 450,
+                "w": 300,
+                "h": 140,
+                "color": "accent"
+              }
+            },
+            {
+              "text": {
+                "id": "beats-t",
+                "text": "one line + its actions",
+                "x": 440,
+                "y": 610,
+                "w": 340,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "script",
+                "to": "beats"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Kokoro reads each beat's line aloud, on your CPU, and the length of that audio sets the beat's timing.",
+          "do": [
+            {
+              "box": {
+                "id": "tts",
+                "text": "Kokoro",
+                "x": 820,
+                "y": 450,
+                "w": 300,
+                "h": 140,
+                "color": "accent-2"
+              }
+            },
+            {
+              "text": {
+                "id": "tts-t",
+                "text": "voice per beat",
+                "x": 820,
+                "y": 610,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "beats",
+                "to": "tts"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Then Playwright records every scene in real time, running the beat's actions while its line plays.",
+          "do": [
+            {
+              "box": {
+                "id": "rec",
+                "text": "Playwright",
+                "x": 1180,
+                "y": 450,
+                "w": 300,
+                "h": 140,
+                "color": "accent-2"
+              }
+            },
+            {
+              "text": {
+                "id": "rec-t",
+                "text": "real-time recording",
+                "x": 1180,
+                "y": 610,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "tts",
+                "to": "rec"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Finally, ffmpeg stitches the scenes and narration into one MP4, with a caption track you can switch on, and a chapter list.",
+          "do": [
+            {
+              "ellipse": {
+                "id": "ff",
+                "text": "ffmpeg",
+                "x": 1540,
+                "y": 450,
+                "w": 280,
+                "h": 140,
+                "color": "good"
+              }
+            },
+            {
+              "text": {
+                "id": "ff-t",
+                "text": "captions + chapters",
+                "x": 1520,
+                "y": 610,
+                "w": 320,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "rec",
+                "to": "ff"
+              }
+            },
+            {
+              "note": {
+                "id": "cache",
+                "text": "narration is cached per beat",
+                "x": 700,
+                "y": 810,
+                "w": 520,
+                "tilt": 1.5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "script",
+      "type": "code",
+      "title": "A script",
+      "beats": [
+        {
+          "say": "This is a script. At the top: the title, the voice, the theme, and a lexicon for words the voice would get wrong.",
+          "do": [
+            {
+              "open": "skills/demo-presentation/templates/script.json",
+              "lines": [
+                1,
+                33
+              ]
+            },
+            {
+              "focus": [
+                2,
+                7
+              ]
+            }
+          ]
+        },
+        {
+          "say": "Then the scenes. A beat is one line to say, and the actions that happen while it's said.",
+          "do": [
+            {
+              "focus": [
+                9,
+                23
+              ]
+            },
+            {
+              "callout": {
+                "line": 15,
+                "text": "one beat: say + do"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Here, a box, a second box and an arrow are drawn on the whiteboard during that sentence.",
+          "do": [
+            {
+              "focus": [
+                17,
+                21
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "types",
+      "type": "card",
+      "title": "Five scene types",
+      "beats": [
+        {
+          "say": "There are five kinds of scene. This title card is one of them.",
+          "do": [
+            {
+              "card": {
+                "title": "Five scene types",
+                "subtitle": "whiteboard · terminal · code · ui · card"
+              }
+            },
+            {
+              "wait": 1200
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "types-board",
+      "type": "whiteboard",
+      "title": "The scene types",
+      "beats": [
+        {
+          "say": "A whiteboard draws a concept by hand, like the pipeline you just saw.",
+          "do": [
+            {
+              "title": "Scene types"
+            },
+            {
+              "box": {
+                "id": "wb",
+                "text": "whiteboard",
+                "x": 100,
+                "y": 390,
+                "w": 300,
+                "h": 140,
+                "color": "accent"
+              }
+            },
+            {
+              "text": {
+                "id": "wb-t",
+                "text": "concepts, drawn",
+                "x": 100,
+                "y": 550,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            }
+          ]
+        },
+        {
+          "say": "A terminal runs real commands. A code scene opens real files. A UI scene drives your app in a real browser.",
+          "do": [
+            {
+              "box": {
+                "id": "term",
+                "text": "terminal",
+                "x": 450,
+                "y": 390,
+                "w": 300,
+                "h": 140
+              }
+            },
+            {
+              "text": {
+                "id": "term-t",
+                "text": "real commands",
+                "x": 450,
+                "y": 550,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "box": {
+                "id": "code",
+                "text": "code",
+                "x": 800,
+                "y": 390,
+                "w": 300,
+                "h": 140
+              }
+            },
+            {
+              "text": {
+                "id": "code-t",
+                "text": "real files",
+                "x": 800,
+                "y": 550,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "box": {
+                "id": "ui",
+                "text": "ui",
+                "x": 1150,
+                "y": 390,
+                "w": 300,
+                "h": 140,
+                "color": "accent-2"
+              }
+            },
+            {
+              "text": {
+                "id": "ui-t",
+                "text": "your app, live",
+                "x": 1150,
+                "y": 550,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            }
+          ]
+        },
+        {
+          "say": "And a card holds a title, or your logo, between chapters.",
+          "do": [
+            {
+              "box": {
+                "id": "card",
+                "text": "card",
+                "x": 1500,
+                "y": 390,
+                "w": 300,
+                "h": 140
+              }
+            },
+            {
+              "text": {
+                "id": "card-t",
+                "text": "titles and logo",
+                "x": 1500,
+                "y": 550,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "terminal",
+      "type": "terminal",
+      "title": "Terminal scenes",
+      "cwd": "skills/demo-presentation",
+      "windowTitle": "skills/demo-presentation",
+      "beats": [
+        {
+          "say": "In a terminal scene, the command really runs, and its output is replayed on camera. Here is the skill's own command line.",
+          "do": [
+            {
+              "run": "scripts/demo help | head -15",
+              "maxLines": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "review-ui",
+      "type": "ui",
+      "title": "The review page",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/video",
+      "ready": "video",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/video"
+        },
+        {
+          "waitFor": "button.pin"
+        },
+        {
+          "eval": "document.body.style.zoom = '1.25'"
+        },
+        {
+          "eval": "document.querySelector('video').currentTime = 3"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "When a video is done, the agent gives you a link to a review page on your own machine.",
+          "do": [
+            {
+              "chapter": {
+                "title": "Review",
+                "description": "a local page, one per project",
+                "ms": 1600
+              }
+            }
+          ]
+        },
+        {
+          "say": "The video plays with a live transcript underneath, word by word.",
+          "do": [
+            {
+              "eval": "(v => { v.muted = true; v.play() })(document.querySelector('video'))"
+            },
+            {
+              "move": {
+                "x": 700,
+                "y": 760,
+                "ms": 600
+              }
+            },
+            {
+              "eval": "document.querySelector('section.transcript').scrollIntoView({ behavior: 'smooth', block: 'end' })"
+            },
+            {
+              "wait": 700
+            },
+            {
+              "spotlight": {
+                "selector": "section.transcript",
+                "ms": 900,
+                "keep": true
+              }
+            },
+            {
+              "wait": 2500
+            }
+          ]
+        },
+        {
+          "say": "Leave a comment and it's pinned to that moment, and to a region of the frame if you mark one.",
+          "do": [
+            {
+              "clearSpotlight": true
+            },
+            {
+              "eval": "scrollTo({ top: 0, behavior: 'smooth' })"
+            },
+            {
+              "wait": 700
+            },
+            {
+              "click": "button.pin"
+            },
+            {
+              "eval": "scrollTo(0, 0)"
+            },
+            {
+              "spotlight": {
+                "selector": "aside.side",
+                "ms": 900,
+                "keep": true
+              }
+            }
+          ]
+        },
+        {
+          "say": "The Script and storyboard tab shows every beat with its frame, and you can edit them there.",
+          "do": [
+            {
+              "clearSpotlight": true
+            },
+            {
+              "click": "text=Script & storyboard"
+            },
+            {
+              "wait": 800
+            },
+            {
+              "eval": "scrollTo(0, 0)"
+            }
+          ]
+        },
+        {
+          "say": "The Pronunciation tab is the project's library of how words are said. Every video in the project uses it.",
+          "do": [
+            {
+              "click": "text=Pronunciation"
+            },
+            {
+              "wait": 600
+            },
+            {
+              "spotlight": {
+                "selector": ".table",
+                "ms": 900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "review-cli",
+      "type": "terminal",
+      "title": "The review loop",
+      "cwd": "skills/demo-presentation",
+      "windowTitle": "skills/demo-presentation",
+      "beats": [
+        {
+          "say": "When you're done, tell the agent. It reads your feedback with demo review, mapped to the beats it's about.",
+          "do": [
+            {
+              "run": "scripts/demo review ui-sample",
+              "maxLines": 18
+            }
+          ]
+        },
+        {
+          "say": "It edits the script, then re-renders only the scenes that changed, and replies to each comment.",
+          "do": [
+            {
+              "type": "scripts/demo build ui-sample --scene log",
+              "output": "narration: 1 generated, 2 cached\nscene log (terminal)\n  $ cat CHANGELOG.md\nversion 3\nfinal video: .demo/runs/ui-sample/final.mp4 (13.4s, 4 captions in a subtitle track, 2 scenes)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recap",
+      "type": "whiteboard",
+      "title": "Recap",
+      "beats": [
+        {
+          "say": "So: you ask, the agent writes a script and records it for real, and you review it on a page with comments pinned to the video.",
+          "do": [
+            {
+              "title": "Recap"
+            },
+            {
+              "list": {
+                "id": "recap",
+                "items": [
+                  "ask for a video",
+                  "script.json: scenes and beats",
+                  "Kokoro voice, real-time recording",
+                  "ffmpeg: captions + chapters",
+                  "review, then re-render what changed"
+                ],
+                "x": 160,
+                "y": 260,
+                "w": 1400,
+                "size": 60,
+                "stagger": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "It needs only uv and git. Everything else installs on first use.",
+          "do": [
+            {
+              "note": {
+                "id": "deps",
+                "text": "needs only uv + git",
+                "x": 1340,
+                "y": 720,
+                "w": 420,
+                "tilt": -2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

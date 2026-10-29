@@ -49,7 +49,7 @@ def estimate_seconds(text: str | None) -> float:
 
 
 def ffmpeg() -> str:
-    """The ffmpeg binary: DEMO_FFMPEG, else the one the imageio-ffmpeg wheel ships (libass + libx264)."""
+    """The ffmpeg binary: DEMO_FFMPEG, else the one the imageio-ffmpeg wheel ships (libx264)."""
     if os.environ.get("DEMO_FFMPEG"):
         return os.environ["DEMO_FFMPEG"]
     import imageio_ffmpeg

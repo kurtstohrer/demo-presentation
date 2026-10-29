@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 — 2026-10-29
+
+- Captions go into `final.mp4` as a soft subtitle track (`mov_text`, English) that
+  players switch on and off. They are never burned into the frames; `captions.srt` is
+  still written next to the video, and `stitch --no-captions` leaves the track out.
+- `demo doctor` no longer checks ffmpeg for libass.
+- README: two videos made with the skill, and a step-by-step Use section.
+
 ## 1.0.0 — 2026-10-28
 
 First standalone release.

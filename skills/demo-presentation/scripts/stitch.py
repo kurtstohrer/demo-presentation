@@ -21,7 +21,7 @@ import soundfile as sf
 
 sys.path.insert(0, str(Path(__file__).parent))
 import reviewlib  # noqa: E402
-from common import SKILL_DIR, ffmpeg  # noqa: E402
+from common import ffmpeg  # noqa: E402
 
 SAMPLE_RATE = 24000
 FADE = 0.25
@@ -143,7 +143,8 @@ def main() -> int:
     final = {"title": script["title"], "duration": round(total, 3), "video": a.out, "scenes": scenes_out}
     (run / "final.json").write_text(json.dumps(final, indent=2) + "\n")
 
-    # Video: fade each scene, concat, burn captions, mux narration.
+    # Video: fade each scene, concat, mux narration. Captions go in as a soft subtitle
+    # track (mov_text) that players can switch on and off, never burned into the frames.
     cmd = [ffmpeg(), "-y", "-loglevel", "error"]
     parts = []
     for i, s in enumerate(scenes_out):
@@ -153,22 +154,23 @@ def main() -> int:
     n = len(scenes_out)
     cmd += ["-i", "narration.wav"]
     vf = ";".join(parts) + ";" + "".join(f"[v{i}]" for i in range(n)) + f"concat=n={n}:v=1:a=0[cat]"
-    if not a.no_captions and script.get("captions", True) and cues:
-        style = "FontName=Inter,FontSize=10,PrimaryColour=&H00FFFFFF,OutlineColour=&H90000000,BorderStyle=3,Outline=4,Shadow=0,MarginV=22"
-        # libass finds Inter in the vendored TTF, not in whatever the system has installed.
-        fonts = (SKILL_DIR / "vendor" / "fonts").as_posix().replace(":", "\\:")
-        vf += f";[cat]subtitles=captions.srt:fontsdir='{fonts}':force_style='{style}'[outv]"
-    else:
-        vf += ";[cat]null[outv]"
+    track_captions = not a.no_captions and script.get("captions", True) and bool(cues)
+    if track_captions:
+        cmd += ["-i", "captions.srt"]
+    vf += ";[cat]null[outv]"
     vf += f";[{n}:a]loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo[aout]"
-    cmd += ["-filter_complex", vf, "-map", "[outv]", "-map", "[aout]", "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+    cmd += ["-filter_complex", vf, "-map", "[outv]", "-map", "[aout]"]
+    if track_captions:
+        cmd += ["-map", f"{n + 1}:s", "-c:s", "mov_text", "-metadata:s:s:0", "language=eng", "-metadata:s:s:0", "handler_name=English"]
+    cmd += ["-c:v", "libx264", "-preset", "medium", "-crf", "20",
             "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-t", f"{total:.3f}", a.out]
     subprocess.run(cmd, cwd=run, check=True)
     version = reviewlib.snapshot_version(run)
     final["version"] = version
     (run / "final.json").write_text(json.dumps(final, indent=2) + "\n")
     print(f"version {version}")
-    print(f"final video: {run / a.out} ({total:.1f}s, {len(cues)} captions, {n} scene{'s' if n != 1 else ''})")
+    captions = f"{len(cues)} captions in a subtitle track" if track_captions else "no caption track"
+    print(f"final video: {run / a.out} ({total:.1f}s, {captions}, {n} scene{'s' if n != 1 else ''})")
     return 0
 
 

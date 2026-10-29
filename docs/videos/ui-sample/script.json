@@ -1,0 +1,104 @@
+{
+  "title": "Release notes in twenty seconds",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "theme": "dark",
+  "captions": true,
+  "lexicon": {
+    "CLI": "C L I",
+    "TTS": "T T S",
+    "JSON": "jason",
+    "TOML": "tommel",
+    "MP4": "M P 4",
+    "uv": "you vee",
+    "npx": "N P X",
+    "ffmpeg": "eff eff em peg",
+    "Kokoro": "/k\u02c8Ok\u0259\u0279O/",
+    "Playwright": "play wright",
+    "SKILL.md": "skill dot M D",
+    "script.json": "script dot jason",
+    "config.toml": "config dot tommel",
+    "brief.md": "brief dot M D",
+    "UI": "U I",
+    "SOP": "S O P",
+    "PR": "P R",
+    "gitignore": "git ignore"
+  },
+  "scenes": [
+    {
+      "id": "idea",
+      "type": "whiteboard",
+      "title": "The idea",
+      "beats": [
+        {
+          "say": "Every release gets a short changelog entry.",
+          "do": [
+            {
+              "title": "Release notes"
+            },
+            {
+              "box": {
+                "id": "pr",
+                "text": "Merged PRs",
+                "x": 200,
+                "y": 440,
+                "w": 420,
+                "h": 170
+              }
+            },
+            {
+              "box": {
+                "id": "log",
+                "text": "CHANGELOG.md",
+                "x": 1300,
+                "y": 440,
+                "w": 420,
+                "h": 170,
+                "color": "accent"
+              }
+            },
+            {
+              "arrow": {
+                "from": "pr",
+                "to": "log",
+                "label": "one line each"
+              }
+            }
+          ]
+        },
+        {
+          "say": "One line per change, written for the people who use it.",
+          "do": [
+            {
+              "underline": "log"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "log",
+      "type": "terminal",
+      "title": "The changelog",
+      "beats": [
+        {
+          "say": "Here is the latest entry.",
+          "do": [
+            {
+              "run": "cat CHANGELOG.md",
+              "maxLines": 16
+            }
+          ]
+        },
+        {
+          "say": "It gives the date, then one line for each change.",
+          "do": [
+            {
+              "wait": 1500
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

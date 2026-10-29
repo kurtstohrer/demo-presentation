@@ -12,7 +12,7 @@
 A machine that records needs `uv` and `git` on `PATH`. Everything else comes through uv,
 pinned in the skill's `uv.lock`:
 
-- ffmpeg with libass and libx264 from the `imageio-ffmpeg` wheel (`DEMO_FFMPEG` overrides);
+- ffmpeg with libx264 from the `imageio-ffmpeg` wheel (`DEMO_FFMPEG` overrides);
 - espeak-ng from the `espeakng-loader` wheel, Playwright from its wheel (which carries its
   own Node; no system Node or npm);
 - Chromium, which `demo setup` fetches with `playwright install chromium`. That is only the

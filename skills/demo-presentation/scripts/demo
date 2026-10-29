@@ -42,7 +42,7 @@ usage() {
 usage: demo <command> [args]
 
   setup                     install the Python env, Chromium and the voice model (once; automatic on first use)
-  doctor                    check uv, git, the env, ffmpeg (libass), Chromium, the voice model, project config
+  doctor                    check uv, git, the env, ffmpeg, Chromium, the voice model, project config
   up | down                 start / stop the [[services]] in .demo/config.toml
   new <name>                create a run (script.json seeded from .demo/config.toml)
   validate <run>            check script.json
@@ -50,7 +50,7 @@ usage: demo <command> [args]
   storyboard <run>          fast dry run: one screenshot per beat -> storyboard/index.html
   tts <run> [--force]       generate narration (cached per beat)
   record <run> [--scene a,b] [--refresh] [--headed]   capture scenes -> scenes/*.mp4
-  stitch <run> [--no-captions]                        mix + concat -> final.mp4
+  stitch <run> [--no-captions]                        mix + concat -> final.mp4 (captions as a subtitle track)
   build <run> [--scene a,b] tts + record + stitch
   publish <run> [args]      run the project's [publish] command (\$DEMO_RUN, \$DEMO_VIDEO, ...; args as "\$@")
   url [<run>]               this project's review UI link; starts the server on a free port if needed
@@ -116,7 +116,7 @@ case "$cmd" in
       echo "ok   python env ($UV_PROJECT_ENVIRONMENT)"
       ff="$("$(venv_python)" "$SKILL_DIR/scripts/common.py" ffmpeg 2>/dev/null || true)"
       if [[ -x "$ff" ]]; then
-        grep -q ' subtitles ' <<<"$("$ff" -hide_banner -filters 2>/dev/null)" && echo "ok   ffmpeg with libass ($ff)" || echo "warn ffmpeg without libass: use --no-captions ($ff)"
+        echo "ok   ffmpeg ($ff)"
       else echo "MISSING ffmpeg (imageio-ffmpeg in the env, or DEMO_FFMPEG)"; ok=0; fi
       [[ -f "$UV_PROJECT_ENVIRONMENT/.chromium" ]] && echo "ok   chromium (playwright)" || echo "todo chromium (installed on first use, or run: demo setup)"
     else

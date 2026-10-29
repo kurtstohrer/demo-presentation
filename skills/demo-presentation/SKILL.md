@@ -185,5 +185,5 @@ Feedback typed in chat with timestamps: map each time to a beat with `final.json
 | 3D app crawls or looks wrong | recording uses hardware WebGL (`--use-angle=gl`; on WSL `MESA_D3D12_DEFAULT_ADAPTER_NAME` picks the GPU, default `NVIDIA`). Try `--headed`; `--software-gl` forces SwiftShader |
 | narration and action out of step | split the beat, or use `"sync": "after"` |
 | command fails on camera | fix the command or set `"allowFail": true` deliberately |
-| captions missing | ffmpeg needs libass (`demo doctor`); otherwise `demo stitch <run> --no-captions` |
+| no captions on screen | they are a subtitle track, never burned in: turn subtitles on in the player; `captions.srt` sits next to `final.mp4` |
 | narration slow or fails at once | first run downloads the model (`demo doctor` shows it); Kokoro runs on CPU, no GPU needed |

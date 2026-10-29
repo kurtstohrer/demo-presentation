@@ -1,0 +1,1138 @@
+{
+  "title": "Using demo-presentation, step by step",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "theme": "dark",
+  "captions": true,
+  "lexicon": {
+    "CLI": "C L I",
+    "TTS": "T T S",
+    "JSON": "jason",
+    "TOML": "tommel",
+    "MP4": "M P 4",
+    "uv": "you vee",
+    "npx": "N P X",
+    "ffmpeg": "eff eff em peg",
+    "Kokoro": "/kˈOkəɹO/",
+    "Playwright": "play wright",
+    "SKILL.md": "skill dot M D",
+    "script.json": "script dot jason",
+    "config.toml": "config dot tommel",
+    "brief.md": "brief dot M D",
+    "UI": "U I",
+    "SOP": "S O P",
+    "PR": "P R",
+    "gitignore": "git ignore",
+    "GL": "G L"
+  },
+  "scenes": [
+    {
+      "id": "steps",
+      "type": "whiteboard",
+      "title": "Seven steps",
+      "beats": [
+        {
+          "say": "This is how to use demo-presentation, from install to a reviewed video, in seven steps.",
+          "do": [
+            {
+              "title": "Seven steps"
+            },
+            {
+              "list": {
+                "id": "steps",
+                "items": [
+                  "1  install",
+                  "2  set up .demo/",
+                  "3  ask for a video",
+                  "4  the agent builds it"
+                ],
+                "x": 160,
+                "y": 240,
+                "w": 780,
+                "size": 60,
+                "stagger": 450
+              }
+            },
+            {
+              "list": {
+                "id": "steps2",
+                "items": [
+                  "5  review it",
+                  "6  publish (optional)",
+                  "7  troubleshoot"
+                ],
+                "x": 1000,
+                "y": 240,
+                "w": 800,
+                "size": 60,
+                "stagger": 450
+              }
+            }
+          ]
+        },
+        {
+          "say": "Your machine needs only uv and git. Python, Chromium, ffmpeg and the voice install on first use.",
+          "do": [
+            {
+              "note": {
+                "id": "deps",
+                "text": "needs only uv + git",
+                "x": 1000,
+                "y": 760,
+                "w": 440,
+                "tilt": -2
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "install",
+      "type": "terminal",
+      "title": "Step 1 · Install",
+      "windowTitle": "install",
+      "beats": [
+        {
+          "say": "Step one: install the skill. In Claude Code, it's a plugin, and this repo is its own marketplace.",
+          "do": [
+            {
+              "comment": "Claude Code plugin (or /plugin install … at its prompt)"
+            },
+            {
+              "type": "claude plugin install demo-presentation --marketplace kurtstohrer/demo-presentation",
+              "output": ""
+            }
+          ]
+        },
+        {
+          "say": "Any other agent that reads SKILL.md files can add it with npx skills.",
+          "do": [
+            {
+              "comment": "any agent that reads SKILL.md"
+            },
+            {
+              "type": "npx skills add kurtstohrer/demo-presentation",
+              "output": ""
+            }
+          ]
+        },
+        {
+          "say": "Or download the zip from the releases page, and unzip it into your agent's skills folder.",
+          "do": [
+            {
+              "comment": "or by hand: unzip the release into your skills folder"
+            },
+            {
+              "type": "unzip demo-presentation-v1.0.0.zip -d path/to/skills/",
+              "output": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skill-dir",
+      "type": "terminal",
+      "title": "Step 1 · Install",
+      "windowTitle": "demo-presentation",
+      "beats": [
+        {
+          "say": "Whichever way you choose, you end up with this folder: the skill file, the command line in scripts, and the scene renderers.",
+          "do": [
+            {
+              "run": "ls skills/demo-presentation",
+              "maxLines": 16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "config",
+      "type": "code",
+      "title": "Step 2 · Set up .demo/",
+      "beats": [
+        {
+          "say": "Step two: give your project a .demo folder. Its config.toml sets the theme and the voice.",
+          "do": [
+            {
+              "open": ".demo/config.toml",
+              "lines": [
+                1,
+                38
+              ]
+            },
+            {
+              "focus": [
+                1,
+                5
+              ]
+            }
+          ]
+        },
+        {
+          "say": "The lexicon fixes words the voice would get wrong, like ffmpeg and uv.",
+          "do": [
+            {
+              "focus": [
+                14,
+                33
+              ]
+            },
+            {
+              "callout": {
+                "line": 22,
+                "text": "say it as"
+              }
+            }
+          ]
+        },
+        {
+          "say": "A web app also sets a base URL, and the services to start before recording. Here, that's a small sample app.",
+          "do": [
+            {
+              "focus": [
+                3,
+                12
+              ]
+            },
+            {
+              "callout": {
+                "line": 12,
+                "text": "demo up starts these"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brief",
+      "type": "code",
+      "title": "Step 2 · Set up .demo/",
+      "beats": [
+        {
+          "say": "brief.md tells the agent what it may show: routes, selectors, safe commands, and what never goes on camera. The agent reads it before it plans a single scene.",
+          "do": [
+            {
+              "open": ".demo/brief.md",
+              "lines": [
+                1,
+                32
+              ]
+            },
+            {
+              "focus": [
+                6,
+                26
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gitignore",
+      "type": "terminal",
+      "title": "Step 2 · Set up .demo/",
+      "beats": [
+        {
+          "say": "Then make sure git ignores the runs and local folders. Videos never belong in the repo.",
+          "do": [
+            {
+              "run": "grep -n demo .gitignore",
+              "maxLines": 6
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "type": "terminal",
+      "title": "Step 3 · Ask for a video",
+      "windowTitle": "your agent",
+      "prompt": "> ",
+      "beats": [
+        {
+          "say": "Step three: ask your agent for a video, in plain words.",
+          "do": [
+            {
+              "type": "make a demo video of the new settings page",
+              "output": ""
+            }
+          ]
+        },
+        {
+          "say": "Name the feature, the PR, or the idea. Say outline first if you want to approve a plan before it records.",
+          "do": [
+            {
+              "type": "record a walkthrough of this PR, outline first",
+              "output": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agent",
+      "type": "whiteboard",
+      "title": "Step 4 · What the agent does",
+      "beats": [
+        {
+          "say": "Step four is the agent's job. It creates a run with demo new, and writes the script.",
+          "do": [
+            {
+              "title": "What the agent does"
+            },
+            {
+              "box": {
+                "id": "new",
+                "text": "demo new",
+                "x": 100,
+                "y": 400,
+                "w": 300,
+                "h": 140
+              }
+            },
+            {
+              "text": {
+                "id": "new-t",
+                "text": "a run folder",
+                "x": 100,
+                "y": 560,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "box": {
+                "id": "write",
+                "text": "write script",
+                "x": 460,
+                "y": 400,
+                "w": 300,
+                "h": 140,
+                "color": "accent"
+              }
+            },
+            {
+              "text": {
+                "id": "write-t",
+                "text": "scenes + beats",
+                "x": 460,
+                "y": 560,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "new",
+                "to": "write"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Then demo storyboard renders one frame per beat in seconds, and the agent checks every frame itself.",
+          "do": [
+            {
+              "box": {
+                "id": "sb",
+                "text": "storyboard",
+                "x": 820,
+                "y": 400,
+                "w": 300,
+                "h": 140,
+                "color": "accent-2"
+              }
+            },
+            {
+              "text": {
+                "id": "sb-t",
+                "text": "one frame per beat",
+                "x": 820,
+                "y": 560,
+                "w": 300,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "write",
+                "to": "sb"
+              }
+            },
+            {
+              "note": {
+                "id": "fix",
+                "text": "check every frame, fix, repeat",
+                "x": 700,
+                "y": 700,
+                "w": 540,
+                "tilt": 1.5
+              }
+            }
+          ]
+        },
+        {
+          "say": "Only then does demo build narrate, record in real time, and stitch the final video.",
+          "do": [
+            {
+              "box": {
+                "id": "build",
+                "text": "demo build",
+                "x": 1180,
+                "y": 400,
+                "w": 300,
+                "h": 140,
+                "color": "good"
+              }
+            },
+            {
+              "text": {
+                "id": "build-t",
+                "text": "narrate · record · stitch",
+                "x": 1150,
+                "y": 560,
+                "w": 360,
+                "size": 38,
+                "align": "center"
+              }
+            },
+            {
+              "arrow": {
+                "from": "sb",
+                "to": "build"
+              }
+            },
+            {
+              "ellipse": {
+                "id": "mp4",
+                "text": "final.mp4",
+                "x": 1540,
+                "y": 400,
+                "w": 280,
+                "h": 140,
+                "color": "good"
+              }
+            },
+            {
+              "arrow": {
+                "from": "build",
+                "to": "mp4"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agent-cli",
+      "type": "terminal",
+      "title": "Step 4 · What the agent does",
+      "cwd": "skills/demo-presentation",
+      "windowTitle": "skills/demo-presentation",
+      "beats": [
+        {
+          "say": "Here's a finished run. It holds the script, the storyboard, the scene clips and the final video.",
+          "do": [
+            {
+              "run": "ls $(scripts/demo path how-it-works)",
+              "maxLines": 16
+            }
+          ]
+        },
+        {
+          "say": "And validate checks a script before anything is rendered.",
+          "do": [
+            {
+              "run": "scripts/demo validate how-it-works",
+              "maxLines": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "ui",
+      "title": "Step 4 · What the agent does",
+      "url": "/",
+      "ready": "main h1",
+      "beats": [
+        {
+          "say": "Remember the settings page you asked for? This is the kind of UI scene the agent records, here on the sample app.",
+          "do": [
+            {
+              "chapter": {
+                "title": "Your app",
+                "description": "a UI scene on the sample app",
+                "ms": 1700
+              }
+            }
+          ]
+        },
+        {
+          "say": "It drives a real browser, and clicks through to the settings page like a person would.",
+          "do": [
+            {
+              "click": "header nav >> text=Settings"
+            },
+            {
+              "waitFor": "#notifications"
+            }
+          ]
+        },
+        {
+          "say": "A spotlight points at whatever the narration is talking about.",
+          "do": [
+            {
+              "spotlight": {
+                "selector": "#notifications",
+                "ms": 900,
+                "keep": true
+              }
+            }
+          ]
+        },
+        {
+          "say": "It turns on the weekly digest, and waits until the app says it saved.",
+          "do": [
+            {
+              "clearSpotlight": true
+            },
+            {
+              "click": "role=switch[name=\"Weekly digest\"]"
+            },
+            {
+              "waitFor": "text=Saved"
+            }
+          ]
+        },
+        {
+          "say": "And it types into the page, just as you would.",
+          "do": [
+            {
+              "fill": {
+                "selector": "input[type=search]",
+                "text": "email"
+              }
+            },
+            {
+              "wait": 600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "external",
+      "type": "ui",
+      "title": "Step 4 · What the agent does",
+      "url": "https://github.com/kurtstohrer/demo-presentation",
+      "ready": "article",
+      "beats": [
+        {
+          "say": "UI scenes aren't limited to your machine. A scene can open any site, like this project's page on GitHub.",
+          "do": [
+            {
+              "chapter": {
+                "title": "Live sites",
+                "description": "any URL, not just localhost",
+                "ms": 1700
+              }
+            }
+          ]
+        },
+        {
+          "say": "For a site behind a login, the token comes from an environment variable, never from the script.",
+          "do": [
+            {
+              "move": {
+                "x": 1680,
+                "y": 330,
+                "ms": 900
+              }
+            },
+            {
+              "wait": 1500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-open",
+      "type": "ui",
+      "title": "Step 5 · Review",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/video",
+      "ready": "main",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/video"
+        },
+        {
+          "waitFor": "button.pin"
+        },
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  \n  const r2 = await (await fetch('/api/runs/ui-sample')).json();\n  for (const c of r2.review.comments) if (!c.text.startsWith('Say which version'))\n    await fetch('/api/runs/ui-sample/comments/' + c.id, { method: 'DELETE' });\n  const lib2 = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (r2.review.decisions.some(d => d.scope === 'scene' && d.key === 'idea' && d.state === 'open'))\n    await fetch('/api/runs/ui-sample/decisions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ scope: 'scene', key: 'idea', decision: 'approve' }) });\n  if (lib2.changelog) { delete lib2.changelog; await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(lib2) }); }\n  return true;\n})()"
+        },
+        {
+          "eval": "document.querySelector('video').currentTime = 0.6"
+        },
+        {
+          "eval": "document.getElementById('app').style.zoom = '1.25'"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "Step five: review it in the browser. The agent gives you a link from demo url, a page on your own machine.",
+          "do": [
+            {
+              "chapter": {
+                "title": "Review in the browser",
+                "description": "demo url prints the link",
+                "ms": 1700
+              }
+            }
+          ]
+        },
+        {
+          "say": "It opens on the video, with a live transcript underneath. Press space to play.",
+          "do": [
+            {
+              "move": {
+                "x": 700,
+                "y": 600,
+                "ms": 500
+              }
+            },
+            {
+              "press": " "
+            },
+            {
+              "eval": "document.querySelector('section.transcript').scrollIntoView({ behavior: 'smooth', block: 'end' })"
+            },
+            {
+              "spotlight": {
+                "selector": "section.transcript",
+                "ms": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "Click any word in the transcript to jump to it, and use the arrow keys to step through.",
+          "do": [
+            {
+              "click": "section.transcript .w[data-i='4']"
+            },
+            {
+              "wait": 900
+            },
+            {
+              "press": "ArrowRight"
+            },
+            {
+              "wait": 600
+            },
+            {
+              "press": " "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-comment",
+      "type": "ui",
+      "title": "Step 5 · Review",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/video",
+      "ready": "main",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/video"
+        },
+        {
+          "waitFor": "button.pin"
+        },
+        {
+          "eval": "document.querySelector('video').currentTime = 5.2"
+        },
+        {
+          "eval": "document.getElementById('app').style.zoom = '1.25'"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "To comment, pause where something should change and press C. The comment is pinned to that moment.",
+          "do": [
+            {
+              "move": {
+                "x": 700,
+                "y": 600,
+                "ms": 500
+              }
+            },
+            {
+              "press": "c"
+            },
+            {
+              "waitFor": "form.composer textarea"
+            }
+          ]
+        },
+        {
+          "say": "Write what you want changed.",
+          "do": [
+            {
+              "fill": {
+                "selector": "form.composer textarea",
+                "text": "Make the arrow label bigger."
+              }
+            }
+          ]
+        },
+        {
+          "say": "Press Mark region, and drag over the part of the frame you mean.",
+          "do": [
+            {
+              "click": "form.composer >> text=Mark region"
+            },
+            {
+              "waitFor": ".region-layer"
+            },
+            {
+              "drag": {
+                "from": {
+                  "x": 560,
+                  "y": 500
+                },
+                "to": {
+                  "x": 880,
+                  "y": 650
+                },
+                "ms": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "Then add it. It joins the list on the right, and a pin marks it on the timeline.",
+          "do": [
+            {
+              "click": "form.composer button[type=submit]"
+            },
+            {
+              "wait": 700
+            },
+            {
+              "spotlight": {
+                "selector": ".timeline",
+                "ms": 900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-pronounce",
+      "type": "ui",
+      "title": "Step 5 · Review",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/video",
+      "ready": "main",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/video"
+        },
+        {
+          "waitFor": "button.pin"
+        },
+        {
+          "eval": "document.querySelector('video').currentTime = 0.6"
+        },
+        {
+          "eval": "document.getElementById('app').style.zoom = '1.25'"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "If the voice says a word wrong, pause and click that word.",
+          "do": [
+            {
+              "click": "section.transcript .w[data-i='5']"
+            },
+            {
+              "waitFor": "text=Edit pronunciation"
+            },
+            {
+              "spotlight": {
+                "selector": "section.transcript",
+                "ms": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "Press Edit pronunciation, write how it should sound, and press Listen to check it.",
+          "do": [
+            {
+              "click": "text=Edit pronunciation"
+            },
+            {
+              "waitFor": ".ui-dialog input"
+            },
+            {
+              "fill": {
+                "selector": ".ui-dialog input >> nth=1",
+                "text": "change log"
+              }
+            },
+            {
+              "hover": ".ui-dialog button >> text=Listen"
+            }
+          ]
+        },
+        {
+          "say": "Save puts it in the project's pronunciation library, so every video says it that way.",
+          "do": [
+            {
+              "click": ".ui-dialog button >> text=Save"
+            },
+            {
+              "waitFor": "text=re-narrate"
+            },
+            {
+              "wait": 600
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-storyboard",
+      "type": "ui",
+      "title": "Step 5 · Review",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/storyboard",
+      "ready": "main",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/storyboard"
+        },
+        {
+          "waitFor": "section.scene"
+        },
+        {
+          "eval": "document.getElementById('app').style.zoom = '1.25'"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "The Script and storyboard tab shows every beat with its frame. You can edit the narration right here.",
+          "do": [
+            {
+              "spotlight": {
+                "selector": "section.scene >> nth=0",
+                "ms": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "Or press Request change on a scene or a beat, and say what you want.",
+          "do": [
+            {
+              "click": "section.scene >> nth=0 >> header >> text=Request change"
+            },
+            {
+              "fill": {
+                "selector": "section.scene >> nth=0 >> header >> input",
+                "text": "Say the file name out loud."
+              }
+            },
+            {
+              "press": "Enter"
+            },
+            {
+              "wait": 600
+            }
+          ]
+        },
+        {
+          "say": "Change requests collects them all in one place for the agent.",
+          "do": [
+            {
+              "click": "text=Change requests"
+            },
+            {
+              "wait": 900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ui-finish",
+      "type": "ui",
+      "title": "Step 5 · Review",
+      "url": "http://127.0.0.1:4179/#/run/ui-sample/video",
+      "ready": "main",
+      "prepare": [
+        {
+          "eval": "(async () => {\n  const r = await (await fetch('/api/runs/ui-sample')).json();\n  if (!r.review.comments.some(c => c.text.startsWith('Say which version')))\n    await fetch('/api/runs/ui-sample/comments', { method: 'POST', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ t: 10.6, text: 'Say which version this entry is for.', region: { x: 0.05, y: 0.29, w: 0.27, h: 0.08 } }) });\n  const lib = (await (await fetch('/api/pronunciations')).json()).entries;\n  if (!lib['CHANGELOG.md'])\n    await fetch('/api/pronunciations', { method: 'PUT', headers: { 'content-type': 'application/json' },\n      body: JSON.stringify({ ...lib, 'CHANGELOG.md': 'change log dot M D' }) });\n  return true;\n})()"
+        },
+        {
+          "goto": "http://127.0.0.1:4179/#/run/ui-sample/video"
+        },
+        {
+          "waitFor": "button.pin"
+        },
+        {
+          "eval": "document.querySelector('video').currentTime = 10.6"
+        },
+        {
+          "eval": "document.getElementById('app').style.zoom = '1.25'"
+        },
+        {
+          "eval": "scrollTo(0, 0)"
+        },
+        {
+          "wait": 600
+        }
+      ],
+      "beats": [
+        {
+          "say": "Re-render changes runs the same commands the agent would, for only what changed.",
+          "do": [
+            {
+              "hover": "text=Re-render changes"
+            },
+            {
+              "spotlight": {
+                "selector": "text=Re-render changes",
+                "ms": 900
+              }
+            }
+          ]
+        },
+        {
+          "say": "When it's right, press Approve video. If not, tell your agent you left feedback, or paste it the prompt from Copy agent prompt.",
+          "do": [
+            {
+              "hover": "text=Approve video"
+            },
+            {
+              "spotlight": {
+                "selector": "text=Approve video",
+                "ms": 900
+              }
+            },
+            {
+              "wait": 1200
+            },
+            {
+              "hover": "text=Copy agent prompt"
+            },
+            {
+              "spotlight": {
+                "selector": "text=Copy agent prompt",
+                "ms": 900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "review-cli",
+      "type": "terminal",
+      "title": "Step 5 · Review",
+      "cwd": "skills/demo-presentation",
+      "windowTitle": "skills/demo-presentation",
+      "beats": [
+        {
+          "say": "The agent reads your comments with demo review. Each one is mapped to its beat.",
+          "do": [
+            {
+              "run": "scripts/demo review ui-sample",
+              "maxLines": 12
+            }
+          ]
+        },
+        {
+          "say": "It edits the script, re-renders only the scenes that changed, replies to every comment, and sends you the link again.",
+          "do": [
+            {
+              "type": "scripts/demo build ui-sample --scene log",
+              "output": "narration: 1 generated, 2 cached\nscene log (terminal)\n  $ cat CHANGELOG.md\nversion 3\nfinal video: .demo/runs/ui-sample/final.mp4 (13.4s, 4 captions in a subtitle track, 2 scenes)"
+            },
+            {
+              "type": "scripts/demo review ui-sample --reply cb07c0d \"Added the version.\"",
+              "output": "cb07c0d: addressed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "publish",
+      "type": "code",
+      "title": "Step 6 · Publish (optional)",
+      "beats": [
+        {
+          "say": "Step six is optional. If your team keeps videos somewhere else, add a publish command to config.toml.",
+          "do": [
+            {
+              "open": ".demo/config.toml",
+              "lines": [
+                1,
+                38
+              ]
+            },
+            {
+              "focus": [
+                35,
+                38
+              ]
+            }
+          ]
+        },
+        {
+          "say": "demo publish runs it with the video, captions and title in environment variables, and the agent passes on whatever it prints.",
+          "do": [
+            {
+              "highlight": [
+                36,
+                36
+              ]
+            },
+            {
+              "callout": {
+                "line": 38,
+                "text": "your command"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trouble",
+      "type": "terminal",
+      "title": "Step 7 · Troubleshooting",
+      "cwd": "skills/demo-presentation",
+      "windowTitle": "skills/demo-presentation",
+      "beats": [
+        {
+          "say": "Step seven, when something goes wrong: start with demo doctor. It shows what's installed and what will install on first use.",
+          "do": [
+            {
+              "type": "scripts/demo doctor",
+              "output": "ok   uv\nok   git\nok   python env (~/.cache/demo-presentation/py-63fdb22efb16/.venv)\nok   ffmpeg (~/.cache/demo-presentation/py-63fdb22efb16/.venv/lib/python3.12/site-packages/image…\nok   chromium (playwright)\nok   voice model (~/.cache/demo-presentation/models)\nok   project config (~/code/demo-presentation/.demo/config.toml)\nok   project brief (.demo/brief.md)\n     runs: ~/code/demo-presentation/.demo/runs"
+            }
+          ]
+        },
+        {
+          "say": "If screenshots fail with unable to capture, add the software GL flag to storyboard and build.",
+          "do": [
+            {
+              "comment": "\"Unable to capture screenshot\": render without the GPU"
+            },
+            {
+              "type": "scripts/demo build my-video --software-gl",
+              "output": ""
+            }
+          ]
+        },
+        {
+          "say": "And if a UI scene times out, storyboard it with the headed flag to watch the browser, and check the selector.",
+          "do": [
+            {
+              "comment": "a UI scene times out: watch it in a real window"
+            },
+            {
+              "type": "scripts/demo storyboard my-video --headed",
+              "output": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recap",
+      "type": "whiteboard",
+      "title": "Recap",
+      "beats": [
+        {
+          "say": "That's it: install, set up .demo, ask, let the agent build, review, and publish if you want to.",
+          "do": [
+            {
+              "title": "Recap"
+            },
+            {
+              "list": {
+                "id": "recap",
+                "items": [
+                  "install: plugin, npx skills, or the zip",
+                  ".demo/: config.toml + brief.md",
+                  "ask → the agent storyboards and builds",
+                  "review: comments, then demo review",
+                  "publish if you want; demo doctor if stuck"
+                ],
+                "x": 160,
+                "y": 260,
+                "w": 1500,
+                "size": 60,
+                "stagger": 800
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "baseUrl": "http://127.0.0.1:4310"
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sample Notes · Settings</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header>
+  <span class="brand">Sample Notes</span>
+  <nav><a href="/">Projects</a><a href="/settings/" aria-current="page">Settings</a></nav>
+</header>
+<main>
+  <h1>Settings</h1>
+  <p class="lede">One page, three sections.</p>
+
+  <section id="profile">
+    <h2>Profile</h2>
+    <label class="field">Name<input value="Sam Rivera"></label>
+    <label class="field">Email<input type="email" value="sam@example.com"></label>
+  </section>
+
+  <section id="notifications">
+    <h2>Notifications</h2>
+    <div class="row"><div>Mentions<small>When someone mentions you in a note</small></div>
+      <button role="switch" aria-checked="true" aria-label="Mentions"></button></div>
+    <div class="row"><div>Weekly digest<small>A summary of your projects every Monday</small></div>
+      <button role="switch" aria-checked="false" aria-label="Weekly digest"></button></div>
+  </section>
+
+  <section id="integrations">
+    <h2>Integrations</h2>
+    <input type="search" placeholder="Search integrations" aria-label="Search integrations">
+    <ul class="list">
+      <li>Email <span>send notes by email</span></li>
+      <li>Email digest <span>weekly summary</span></li>
+      <li>Calendar <span>link notes to events</span></li>
+      <li>Webhooks <span>post changes to a URL</span></li>
+      <li>RSS <span>follow a project</span></li>
+    </ul>
+  </section>
+</main>
+<div class="toast" role="status">Saved</div>
+<script>
+  // Switches save straight away; search filters the list as you type.
+  const toast = document.querySelector('.toast')
+  let timer
+  document.querySelectorAll('[role=switch]').forEach(s => s.addEventListener('click', () => {
+    s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true'))
+    toast.classList.add('on'); clearTimeout(timer); timer = setTimeout(() => toast.classList.remove('on'), 1800)
+  }))
+  document.querySelector('input[type=search]').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase()
+    document.querySelectorAll('#integrations li').forEach(li => { li.hidden = !li.textContent.toLowerCase().includes(q) })
+  })
+</script>
+</body>
+</html>
