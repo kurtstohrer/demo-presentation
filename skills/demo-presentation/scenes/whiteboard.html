@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/skill/scenes/scene.css">
+<style>
+  body { background: var(--paper); }
+  .board { position: absolute; inset: 0; }
+  .board svg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+  .grid {
+    position: absolute; inset: 0; opacity: 0.5;
+    background-image: radial-gradient(var(--line) 1.4px, transparent 1.4px);
+    background-size: 40px 40px;
+  }
+  .hand { font-family: Caveat, cursive; color: var(--ink); }
+  .label {
+    position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; line-height: 1.05; padding: 10px 18px; pointer-events: none;
+    transition: opacity 400ms ease;
+  }
+  .label small { display: block; font-size: 0.55em; color: var(--muted); margin-top: 6px; }
+  .note {
+    position: absolute; padding: 22px 26px; background: var(--note); color: var(--note-ink);
+    font-family: Caveat, cursive; font-size: 40px; line-height: 1.05;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.25); transform-origin: 50% 0;
+    animation: note-in 450ms cubic-bezier(.2,.9,.3,1.3) both;
+  }
+  @keyframes note-in { from { opacity: 0; transform: rotate(var(--tilt)) scale(0.6); } to { opacity: 1; transform: rotate(var(--tilt)); } }
+  .title {
+    position: absolute; left: 96px; top: 56px; font-family: Caveat, cursive;
+    font-size: 96px; font-weight: 700; color: var(--ink);
+  }
+  .list { position: absolute; font-family: Caveat, cursive; color: var(--ink); }
+  .list li { list-style: none; margin: 0 0 14px; opacity: 0; transform: translateX(-12px);
+    transition: opacity 350ms ease, transform 350ms ease; }
+  .list li.on { opacity: 1; transform: none; }
+  .list li::before { content: '→ '; color: var(--accent); }
+  .gone { opacity: 0 !important; transition: opacity 400ms ease; }
+  .pulse { animation: pulse 900ms ease-in-out 2; }
+  @keyframes pulse { 50% { filter: drop-shadow(0 0 16px var(--accent)); transform: scale(1.04); } }
+</style>
+</head>
+<body>
+<div class="grid"></div>
+<div class="board" id="board"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<script src="/skill/vendor/roughjs/rough.js"></script>
+<script src="/skill/scenes/runtime.js"></script>
+<script>
+(() => {
+  const S = window.__scene
+  const board = document.getElementById('board')
+  const svg = document.getElementById('svg')
+  const rc = rough.svg(svg)
+  const items = new Map() // id -> { x, y, w, h, nodes: [] }
+  let seed = 7
+
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim()
+  const color = (c, fallback = 'ink') => (c && c.startsWith('#') ? c : css(c || fallback) || c)
+
+  function animateStroke(g, ms) {
+    const paths = [...g.querySelectorAll('path')]
+    const total = paths.reduce((n, p) => n + p.getTotalLength(), 0) || 1
+    let delay = 0
+    for (const p of paths) {
+      const len = p.getTotalLength()
+      const dur = (ms * len) / total
+      p.style.strokeDasharray = `${len}`
+      p.style.strokeDashoffset = `${len}`
+      p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], {
+        duration: dur / (window.__speed || 1), delay: delay / (window.__speed || 1), fill: 'forwards', easing: 'ease-in-out',
+      })
+      delay += dur
+    }
+    return S.sleep(ms)
+  }
+
+  function addLabel(id, text, box, size, extraClass = '') {
+    const el = document.createElement('div')
+    el.className = `label hand ${extraClass}`
+    Object.assign(el.style, { left: `${box.x}px`, top: `${box.y}px`, width: `${box.w}px`, height: `${box.h}px`, fontSize: `${size}px`, opacity: 0 })
+    const [main, sub] = String(text).split('\n')
+    el.textContent = main
+    if (sub) { const s = document.createElement('small'); s.textContent = sub; el.appendChild(s) }
+    board.appendChild(el)
+    requestAnimationFrame(() => (el.style.opacity = 1))
+    return el
+  }
+
+  function register(id, rect, nodes) {
+    if (!id) id = `auto-${items.size}`
+    items.set(id, { ...rect, nodes })
+  }
+
+  function opts(spec) {
+    return {
+      stroke: color(spec.color, 'ink'), strokeWidth: spec.strokeWidth || 3, roughness: spec.roughness ?? 1.6, seed: seed++,
+      fill: spec.fill ? color(spec.fill) : undefined, fillStyle: spec.fillStyle || 'hachure', hachureGap: 14, fillWeight: 1.6,
+    }
+  }
+
+  async function shape(kind, spec) {
+    const r = { x: spec.x ?? 760, y: spec.y ?? 440, w: spec.w ?? 360, h: spec.h ?? 150 }
+    const g = kind === 'ellipse'
+      ? rc.ellipse(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, opts(spec))
+      : rc.rectangle(r.x, r.y, r.w, r.h, opts(spec))
+    svg.appendChild(g)
+    const done = animateStroke(g, spec.ms ?? 700)
+    const nodes = [g]
+    if (spec.text) {
+      await S.sleep(250)
+      nodes.push(addLabel(spec.id, spec.text, r, spec.size ?? 48))
+    }
+    register(spec.id, r, nodes)
+    return done
+  }
+
+  function edgePoint(a, b) {
+    // Point where the segment from a's center toward b's center leaves a's box (with a gap).
+    const cx = a.x + a.w / 2, cy = a.y + a.h / 2
+    const dx = b.x + b.w / 2 - cx, dy = b.y + b.h / 2 - cy
+    const sx = dx === 0 ? Infinity : (a.w / 2 + 14) / Math.abs(dx)
+    const sy = dy === 0 ? Infinity : (a.h / 2 + 14) / Math.abs(dy)
+    const s = Math.min(sx, sy)
+    return [cx + dx * s, cy + dy * s]
+  }
+
+  S.on('init', (scene) => {
+    if (scene.grid === false) document.querySelector('.grid').remove()
+  })
+
+  S.on('title', (text) => {
+    const el = document.createElement('div')
+    el.className = 'title fade-in'
+    el.textContent = text
+    board.appendChild(el)
+    register('title', { x: 96, y: 56, w: 1000, h: 110 }, [el])
+    return S.sleep(450)
+  })
+  S.on('box', (spec) => shape('rect', spec))
+  S.on('ellipse', (spec) => shape('ellipse', spec))
+  S.on('text', (spec) => {
+    const r = { x: spec.x ?? 760, y: spec.y ?? 440, w: spec.w ?? 600, h: spec.h ?? 80 }
+    const el = addLabel(spec.id, spec.text, r, spec.size ?? 44)
+    el.style.alignItems = spec.align === 'center' ? 'center' : 'flex-start'
+    el.style.color = color(spec.color, 'ink')
+    register(spec.id, r, [el])
+    return S.sleep(400)
+  })
+  S.on('note', (spec) => {
+    const el = document.createElement('div')
+    el.className = 'note'
+    el.style.setProperty('--tilt', `${spec.tilt ?? (Math.random() * 6 - 3).toFixed(1)}deg`)
+    Object.assign(el.style, { left: `${spec.x ?? 760}px`, top: `${spec.y ?? 440}px`, width: `${spec.w ?? 320}px` })
+    el.textContent = spec.text
+    board.appendChild(el)
+    register(spec.id, { x: spec.x ?? 760, y: spec.y ?? 440, w: el.offsetWidth, h: el.offsetHeight }, [el])
+    return S.sleep(450)
+  })
+  S.on('list', async (spec) => {
+    const ul = document.createElement('ul')
+    ul.className = 'list'
+    Object.assign(ul.style, { left: `${spec.x ?? 120}px`, top: `${spec.y ?? 260}px`, width: `${spec.w ?? 900}px`, fontSize: `${spec.size ?? 52}px`, padding: 0, margin: 0 })
+    board.appendChild(ul)
+    register(spec.id, { x: spec.x ?? 120, y: spec.y ?? 260, w: spec.w ?? 900, h: 400 }, [ul])
+    for (const item of spec.items || []) {
+      const li = document.createElement('li')
+      li.textContent = item
+      ul.appendChild(li)
+      requestAnimationFrame(() => li.classList.add('on'))
+      await S.sleep(spec.stagger ?? 500)
+    }
+  })
+  S.on('arrow', async (spec) => {
+    const [fromId, toId] = spec.from ? [spec.from, spec.to] : spec.between || []
+    const a = items.get(fromId), b = items.get(toId)
+    if (!a || !b) throw new Error(`arrow: unknown element ${!a ? fromId : toId}`)
+    const [x1, y1] = edgePoint(a, b)
+    const [x2, y2] = edgePoint(b, a)
+    const ang = Math.atan2(y2 - y1, x2 - x1)
+    const head = 26
+    const o = { ...opts(spec), roughness: spec.roughness ?? 1.2 }
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.appendChild(spec.curve ? rc.curve([[x1, y1], [(x1 + x2) / 2, (y1 + y2) / 2 - spec.curve], [x2, y2]], o) : rc.line(x1, y1, x2, y2, o))
+    for (const d of [-0.45, 0.45]) {
+      g.appendChild(rc.line(x2, y2, x2 - head * Math.cos(ang + d), y2 - head * Math.sin(ang + d), o))
+    }
+    if (spec.both) for (const d of [-0.45, 0.45]) {
+      g.appendChild(rc.line(x1, y1, x1 + head * Math.cos(ang + d), y1 + head * Math.sin(ang + d), o))
+    }
+    svg.appendChild(g)
+    const nodes = [g]
+    await animateStroke(g, spec.ms ?? 600)
+    if (spec.label) {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2 - (spec.curve || 0) / 2
+      nodes.push(addLabel(null, spec.label, { x: mx - 200, y: my - 64, w: 400, h: 56 }, spec.size ?? 34))
+    }
+    register(spec.id || `${fromId}->${toId}`, { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1), h: Math.abs(y2 - y1) }, nodes)
+  })
+  S.on('underline', (id) => {
+    const it = items.get(id)
+    if (!it) throw new Error(`underline: unknown element ${id}`)
+    const g = rc.line(it.x + 10, it.y + it.h + 6, it.x + it.w - 10, it.y + it.h + 10, { stroke: css('accent'), strokeWidth: 5, roughness: 2, seed: seed++ })
+    svg.appendChild(g)
+    it.nodes.push(g)
+    return animateStroke(g, 450)
+  })
+  S.on('circle', (id) => {
+    const it = items.get(id)
+    if (!it) throw new Error(`circle: unknown element ${id}`)
+    const g = rc.ellipse(it.x + it.w / 2, it.y + it.h / 2, it.w + 80, it.h + 70, { stroke: css('accent'), strokeWidth: 4, roughness: 2.2, seed: seed++ })
+    svg.appendChild(g)
+    it.nodes.push(g)
+    return animateStroke(g, 650)
+  })
+  S.on('highlight', (id) => {
+    const it = items.get(id)
+    if (!it) throw new Error(`highlight: unknown element ${id}`)
+    for (const n of it.nodes) { n.classList.remove('pulse'); void n.getBoundingClientRect(); n.classList.add('pulse'); n.style.transformOrigin = 'center'; n.style.transformBox = 'fill-box' }
+    return S.sleep(900)
+  })
+  S.on('erase', (ids) => {
+    for (const id of [].concat(ids)) {
+      const it = items.get(id)
+      if (!it) continue
+      for (const n of it.nodes) n.classList.add('gone')
+      items.delete(id)
+    }
+    return S.sleep(400)
+  })
+  S.on('clear', () => {
+    for (const it of items.values()) for (const n of it.nodes) n.classList.add('gone')
+    items.clear()
+    return S.sleep(450).then(() => { svg.innerHTML = ''; board.querySelectorAll(':scope > :not(svg)').forEach((n) => n.remove()) })
+  })
+})()
+</script>
+</body>
+</html>

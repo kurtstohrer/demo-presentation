@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Repository gate
+        run: uv run --no-project --python 3.12 python scripts/check.py
+
+      - name: Tests
+        run: uv run --no-project --python 3.12 --with fastapi --with httpx --with uvicorn python -m unittest discover -s tests
+
+      - name: Plugin manifest
+        run: npx -y @anthropic-ai/claude-code plugin validate .
+
+      # The skill ships prebuilt ui/ and vendor/ so installing it needs no Node.
+      # Rebuild both from source and fail if what is committed differs.
+      - name: Rebuild the review UI
+        working-directory: apps/review-ui
+        run: npm ci --no-audit --no-fund && npm run build
+      - name: Rebuild the scene vendor bundle
+        working-directory: apps/vendor
+        run: npm ci --no-audit --no-fund && npm run build
+      - name: Committed builds are current
+        run: |
+          git status --porcelain -- skills/demo-presentation/ui skills/demo-presentation/vendor
+          test -z "$(git status --porcelain -- skills/demo-presentation/ui skills/demo-presentation/vendor)" \
+            || { echo "::error::skills/demo-presentation/ui or vendor is stale: run npm run build in apps/review-ui and apps/vendor, then commit"; exit 1; }

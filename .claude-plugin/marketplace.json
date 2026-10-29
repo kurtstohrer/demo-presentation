@@ -1,0 +1,11 @@
+{
+  "name": "kurtstohrer",
+  "owner": { "name": "Kurt Stohrer" },
+  "plugins": [
+    {
+      "name": "demo-presentation",
+      "source": "./",
+      "description": "Record, review and re-render narrated demo videos."
+    }
+  ]
+}

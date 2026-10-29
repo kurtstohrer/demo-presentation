@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/skill/vendor/xterm/xterm.css">
+<link rel="stylesheet" href="/skill/scenes/scene.css">
+<style>
+  .term { flex: 1; min-height: 0; padding: 22px 26px; background: var(--bg-2); }
+  .xterm .xterm-viewport { overflow-y: hidden !important; background: transparent !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="scene-title"></div>
+  <div class="scene-sub"></div>
+  <div class="window">
+    <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span><span id="wtitle">terminal</span></div>
+    <div class="term" id="term"></div>
+  </div>
+</div>
+<script src="/skill/vendor/xterm/xterm.js"></script>
+<script src="/skill/scenes/runtime.js"></script>
+<script>
+(() => {
+  const S = window.__scene
+  let term
+  let prompt = '$ '
+  let typeMs = 38
+
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim()
+  const hexToRgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255] }
+  const fg = (name, s) => { const [r, g, b] = hexToRgb(css(name)); return `\x1b[38;2;${r};${g};${b}m${s}\x1b[0m` }
+  const write = (s) => new Promise((r) => term.write(s, r))
+
+  S.on('init', (scene) => {
+    const fontSize = scene.fontSize || 24
+    const el = document.getElementById('term')
+    document.getElementById('wtitle').textContent = scene.windowTitle || scene.cwdLabel || 'terminal'
+    if (scene.title) document.querySelector('.scene-title').textContent = scene.title
+    if (scene.subtitle) document.querySelector('.scene-sub').textContent = scene.subtitle
+    prompt = scene.prompt ?? '$ '
+    typeMs = scene.typeMs ?? 38
+    const cols = Math.floor((el.clientWidth - 52) / (fontSize * 0.602))
+    const rows = Math.floor((el.clientHeight - 44) / (fontSize * 1.25))
+    term = new Terminal({
+      cols, rows, fontSize, lineHeight: 1.25, fontFamily: '"JetBrains Mono", monospace', cursorBlink: false,
+      allowTransparency: true, convertEol: true, scrollback: 2000,
+      theme: { background: css('bg-2'), foreground: css('fg'), cursor: css('accent'), selectionBackground: css('line') },
+    })
+    term.open(el)
+    // Fit rows to the real rendered cell height so the last line never clips.
+    const cellH = el.querySelector('.xterm-rows > div')?.getBoundingClientRect().height
+    if (cellH) term.resize(cols, Math.floor((el.clientHeight - 44) / cellH))
+    return write(fg('accent', prompt))
+  })
+
+  async function typeCommand(cmd) {
+    for (const ch of cmd) {
+      await write(ch)
+      await S.sleep(typeMs + Math.random() * typeMs * 0.8)
+    }
+    await S.sleep(260)
+    await write('\r\n')
+  }
+
+  async function streamOutput(text, linesPerTick = 3) {
+    const lines = String(text).replace(/\r?\n$/, '').split(/\r?\n/)
+    for (let i = 0; i < lines.length; i += linesPerTick) {
+      await write(lines.slice(i, i + linesPerTick).join('\r\n') + '\r\n')
+      await S.sleep(16)
+    }
+  }
+
+  async function command(cmd, action) {
+    await typeCommand(cmd)
+    const out = action.__output ?? action.output ?? ''
+    if (out) await streamOutput(out, action.linesPerTick)
+    if (action.__exitCode) await write(fg('bad', `exit ${action.__exitCode}`) + '\r\n')
+    await write(fg('accent', prompt))
+  }
+
+  S.on('run', (cmd, action) => command(cmd, action))
+  S.on('type', (cmd, action) => command(cmd, action))
+  S.on('comment', async (text) => {
+    await typeCommand(fg('muted', `# ${text}`))
+    await write(fg('accent', prompt))
+  })
+  S.on('clear', async () => {
+    term.reset()
+    await write(fg('accent', prompt))
+  })
+})()
+</script>
+</body>
+</html>

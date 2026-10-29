@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+# demo-presentation CLI.
+#
+# The skill folder (installed into each repo) is read-only source. On first use
+# it is copied to $DEMO_CACHE/app-<hash>, and the Python environment (Playwright,
+# ffmpeg, Kokoro ONNX) is installed once per lockfile hash into py-<hash>. uv is the
+# only tool it needs. Project settings live in .demo/config.toml; runs in .demo/runs
+# (gitignored).
+set -euo pipefail
+
+SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CACHE="${DEMO_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/demo-presentation}"
+export DEMO_PROJECT_ROOT="${DEMO_PROJECT_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+
+# ---- relocate to the per-version app copy (once per code change)
+if [[ ! -f "$SRC/.demo-app" ]]; then
+  code_hash="$(cd "$SRC" && find . -type f ! -path './node_modules/*' ! -path './.venv/*' ! -path './runs/*' ! -name '*.pyc' ! -name '.install-*' -print0 \
+    | sort -z | xargs -0 sha1sum | sha1sum | cut -c1-12)"
+  APP="$CACHE/app-$code_hash"
+  if [[ ! -f "$APP/.demo-app" ]]; then
+    mkdir -p "$APP.tmp"
+    (cd "$SRC" && tar cf - --exclude=./node_modules --exclude=./.venv --exclude=./runs --exclude=__pycache__ .) | (cd "$APP.tmp" && tar xf -)
+    touch "$APP.tmp/.demo-app"
+    rm -rf "$APP" && mv "$APP.tmp" "$APP"
+  fi
+  exec "$APP/scripts/demo" "$@"
+fi
+
+SKILL_DIR="$SRC"
+# The environment is keyed by the lockfile, so a code change never reinstalls it.
+py_hash="$(cat "$SKILL_DIR"/pyproject.toml "$SKILL_DIR"/uv.lock | sha1sum | cut -c1-12)"
+export UV_PROJECT_ENVIRONMENT="$CACHE/py-$py_hash/.venv"
+export DEMO_MODELS="${DEMO_MODELS:-$CACHE/models}"   # Kokoro ONNX model + voices (~350 MB, once)
+# WSL: steer mesa d3d12 (hardware WebGL) to the discrete GPU; ignored elsewhere.
+export MESA_D3D12_DEFAULT_ADAPTER_NAME="${MESA_D3D12_DEFAULT_ADAPTER_NAME:-NVIDIA}"
+export DEMO_CONFIG="${DEMO_CONFIG:-$DEMO_PROJECT_ROOT/.demo/config.toml}"
+RUNS_DIR="${DEMO_RUNS_DIR:-$DEMO_PROJECT_ROOT/.demo/runs}"
+mkdir -p "$RUNS_DIR"
+
+usage() {
+  cat <<EOF
+usage: demo <command> [args]
+
+  setup                     install the Python env, Chromium and the voice model (once; automatic on first use)
+  doctor                    check uv, git, the env, ffmpeg (libass), Chromium, the voice model, project config
+  up | down                 start / stop the [[services]] in .demo/config.toml
+  new <name>                create a run (script.json seeded from .demo/config.toml)
+  validate <run>            check script.json
+  voices [--text "..."]     render Kokoro voice samples into the runs dir (_voices/)
+  storyboard <run>          fast dry run: one screenshot per beat -> storyboard/index.html
+  tts <run> [--force]       generate narration (cached per beat)
+  record <run> [--scene a,b] [--refresh] [--headed]   capture scenes -> scenes/*.mp4
+  stitch <run> [--no-captions]                        mix + concat -> final.mp4
+  build <run> [--scene a,b] tts + record + stitch
+  publish <run> [args]      run the project's [publish] command (\$DEMO_RUN, \$DEMO_VIDEO, ...; args as "\$@")
+  url [<run>]               this project's review UI link; starts the server on a free port if needed
+  serve [--port 4177]       review UI on http://127.0.0.1:4177 (video + transcript, comments, script, pronunciation, render jobs)
+  review <run>              open review items for the agent; --reply <id> "..." | --done <id> | --json
+  path <run>                print the run directory
+
+Runs: $RUNS_DIR
+Project: $DEMO_PROJECT_ROOT
+EOF
+}
+
+setup_deps() {
+  if [[ -z "$(venv_python)" ]]; then
+    echo "demo: installing the Python env (Playwright, ffmpeg, Kokoro ONNX) into $UV_PROJECT_ENVIRONMENT — once, ~650 MB" >&2
+    (cd "$SKILL_DIR" && uv sync --frozen --python 3.12 >&2)
+  fi
+  if [[ ! -f "$UV_PROJECT_ENVIRONMENT/.chromium" ]]; then
+    echo "demo: installing Chromium for Playwright — once per Playwright version" >&2
+    py -m playwright install chromium >&2 && touch "$UV_PROJECT_ENVIRONMENT/.chromium"
+  fi
+}
+
+# The venv's interpreter: bin/python on Unix, Scripts/python.exe on Windows.
+venv_python() {
+  if [[ -x "$UV_PROJECT_ENVIRONMENT/bin/python" ]]; then echo "$UV_PROJECT_ENVIRONMENT/bin/python";
+  elif [[ -x "$UV_PROJECT_ENVIRONMENT/Scripts/python.exe" ]]; then echo "$UV_PROJECT_ENVIRONMENT/Scripts/python.exe"; fi
+}
+# `python3` is not on PATH on Windows; the venv's interpreter runs the dependency-free helpers instead.
+py3() {
+  local p; p="$(command -v python3 2>/dev/null || true)"
+  # The Microsoft Store ships a python3 stub under WindowsApps that only opens the Store: never use it.
+  if [[ -n "$p" && "$p" != *WindowsApps* ]]; then python3 "$@"; else "$(venv_python)" "$@"; fi
+}
+
+resolve_run() {
+  local r="${1:?run name or path required}"
+  if [[ -f "$r/script.json" ]]; then (cd "$r" && pwd); return; fi
+  if [[ -f "$RUNS_DIR/$r/script.json" ]]; then echo "$RUNS_DIR/$r"; return; fi
+  echo "no script.json for run '$r' (looked in ./$r and $RUNS_DIR/$r)" >&2
+  exit 1
+}
+
+py() { PYTHONWARNINGS=ignore uv run --project "$SKILL_DIR" --frozen --quiet python "$@"; }
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  help|-h|--help|path|doctor) ;;
+  *) setup_deps ;;
+esac
+
+case "$cmd" in
+  setup)
+    setup_deps
+    "$0" doctor
+    ;;
+  doctor)
+    ok=1
+    for bin in uv git; do
+      if command -v "$bin" >/dev/null; then echo "ok   $bin"; else echo "MISSING $bin"; ok=0; fi
+    done
+    if [[ -n "$(venv_python)" ]]; then
+      echo "ok   python env ($UV_PROJECT_ENVIRONMENT)"
+      ff="$("$(venv_python)" "$SKILL_DIR/scripts/common.py" ffmpeg 2>/dev/null || true)"
+      if [[ -x "$ff" ]]; then
+        grep -q ' subtitles ' <<<"$("$ff" -hide_banner -filters 2>/dev/null)" && echo "ok   ffmpeg with libass ($ff)" || echo "warn ffmpeg without libass: use --no-captions ($ff)"
+      else echo "MISSING ffmpeg (imageio-ffmpeg in the env, or DEMO_FFMPEG)"; ok=0; fi
+      [[ -f "$UV_PROJECT_ENVIRONMENT/.chromium" ]] && echo "ok   chromium (playwright)" || echo "todo chromium (installed on first use, or run: demo setup)"
+    else
+      echo "todo python env (installed on first use, or run: demo setup)"
+    fi
+    [[ -s "$DEMO_MODELS/kokoro-v1.0.onnx" && -s "$DEMO_MODELS/voices-v1.0.bin" ]] && echo "ok   voice model ($DEMO_MODELS)" || echo "todo voice model (downloads on first narration)"
+    if [[ -f "$DEMO_CONFIG" ]]; then echo "ok   project config ($DEMO_CONFIG)"; else echo "warn no $DEMO_CONFIG: defaults only"; fi
+    [[ -f "$DEMO_PROJECT_ROOT/.demo/brief.md" ]] && echo "ok   project brief (.demo/brief.md)" || echo "warn no .demo/brief.md"
+    echo "     runs: $RUNS_DIR"
+    [[ $ok == 1 ]]
+    ;;
+  up|down)
+    py "$SKILL_DIR/scripts/services.py" "$cmd" "$DEMO_PROJECT_ROOT"
+    ;;
+  new)
+    name="${1:?name required}"
+    dir="$RUNS_DIR/$name"
+    [[ -e "$dir/script.json" ]] && { echo "exists: $dir/script.json" >&2; exit 1; }
+    mkdir -p "$dir"
+    py "$SKILL_DIR/scripts/services.py" template "$SKILL_DIR/templates/script.json" "$name" > "$dir/script.json"
+    echo "$dir/script.json"
+    ;;
+  validate)
+    run="$(resolve_run "${1:-}")"
+    py3 "$SKILL_DIR/scripts/validate.py" "$run"
+    ;;
+  voices)
+    py "$SKILL_DIR/scripts/tts.py" --voices "$RUNS_DIR/_voices" "$@"
+    ;;
+  storyboard)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/record.py" "$run" --storyboard "$@"
+    py "$SKILL_DIR/scripts/storyboard_page.py" "$run"
+    py "$SKILL_DIR/scripts/review.py" "$run" --advance storyboard
+    ;;
+  tts)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/tts.py" "$run" "$@"
+    ;;
+  record)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/record.py" "$run" "$@"
+    ;;
+  stitch)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/stitch.py" "$run" "$@"
+    ;;
+  build)
+    run="$(resolve_run "${1:-}")"; shift
+    "$0" tts "$run"
+    "$0" record "$run" "$@"
+    "$0" stitch "$run"
+    ;;
+  publish)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/services.py" publish "$run" "$@"
+    ;;
+  url)
+    # This project's review server: reuse one already serving these runs, else start one
+    # on the first free port from 4177 (other projects' servers hold their own ports).
+    run="${1:-}"; port=""
+    for p in $(seq 4177 4196); do
+      body="$(curl -sf "http://127.0.0.1:$p/api/project" 2>/dev/null || true)"
+      if [[ -z "$body" ]]; then
+        if [[ -z "$port" ]] && ! (exec 3<>"/dev/tcp/127.0.0.1/$p") 2>/dev/null; then port="$p"; fi
+        continue
+      fi
+      if [[ "$(py3 -c 'import json,sys; print(json.load(sys.stdin).get("runs",""))' <<<"$body")" == "$RUNS_DIR" ]]; then
+        port="$p"; found=1; break
+      fi
+    done
+    [[ -n "$port" ]] || { echo "demo: no free port in 4177-4196" >&2; exit 1; }
+    if [[ -z "${found:-}" ]]; then
+      (setsid nohup "$0" serve --port "$port" >/dev/null 2>&1 &)
+      for _ in $(seq 60); do curl -sf "http://127.0.0.1:$port/api/project" >/dev/null 2>&1 && break; sleep 1; done
+    fi
+    echo "http://127.0.0.1:$port/${run:+#/run/$run}"
+    ;;
+  serve)
+    exec env DEMO_RUNS_DIR="$RUNS_DIR" DEMO_BIN="$SKILL_DIR/scripts/demo" PYTHONWARNINGS=ignore \
+      uv run --project "$SKILL_DIR" --frozen --quiet python "$SKILL_DIR/scripts/serve.py" "$@"
+    ;;
+  review)
+    run="$(resolve_run "${1:-}")"; shift
+    py "$SKILL_DIR/scripts/review.py" "$run" "$@"
+    ;;
+  path)
+    resolve_run "${1:-}"
+    ;;
+  help|-h|--help) usage ;;
+  *) usage; exit 2 ;;
+esac

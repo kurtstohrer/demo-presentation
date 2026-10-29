@@ -1,0 +1,178 @@
+{
+  "title": "How a demo is built",
+  "voice": "af_heart",
+  "lexicon": {
+    "CLI": "C L I",
+    "TTS": "T T S"
+  },
+  "scenes": [
+    {
+      "id": "concept",
+      "type": "whiteboard",
+      "beats": [
+        {
+          "say": "A demo is a script of scenes, and every scene is a list of beats.",
+          "do": [
+            {
+              "title": "How a demo is built"
+            },
+            {
+              "box": {
+                "id": "script",
+                "text": "script.json\nscenes + beats",
+                "x": 140,
+                "y": 420,
+                "w": 380,
+                "h": 170
+              }
+            },
+            {
+              "box": {
+                "id": "tts",
+                "text": "Kokoro TTS\nper-beat audio",
+                "x": 770,
+                "y": 250,
+                "w": 380,
+                "h": 170,
+                "color": "accent-2"
+              }
+            },
+            {
+              "box": {
+                "id": "rec",
+                "text": "Playwright\nscreencast",
+                "x": 770,
+                "y": 600,
+                "w": 380,
+                "h": 170,
+                "color": "good"
+              }
+            },
+            {
+              "arrow": {
+                "from": "script",
+                "to": "tts"
+              }
+            },
+            {
+              "arrow": {
+                "from": "script",
+                "to": "rec"
+              }
+            }
+          ]
+        },
+        {
+          "say": "Narration timing drives the recording, then ffmpeg stitches everything together.",
+          "do": [
+            {
+              "ellipse": {
+                "id": "ff",
+                "text": "ffmpeg",
+                "x": 1420,
+                "y": 430,
+                "w": 360,
+                "h": 170,
+                "color": "accent"
+              }
+            },
+            {
+              "arrow": {
+                "from": "tts",
+                "to": "ff"
+              }
+            },
+            {
+              "arrow": {
+                "from": "rec",
+                "to": "ff",
+                "label": "mp4"
+              }
+            },
+            {
+              "note": {
+                "text": "outline first, then record",
+                "x": 1380,
+                "y": 760,
+                "w": 380
+              }
+            },
+            {
+              "circle": "ff"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cli",
+      "type": "terminal",
+      "title": "Terminal scenes run real commands",
+      "beats": [
+        {
+          "say": "Terminal scenes run the real command and replay its output.",
+          "do": [
+            {
+              "comment": "recent history"
+            },
+            {
+              "run": "git log --oneline -8",
+              "maxLines": 12
+            }
+          ]
+        },
+        {
+          "say": "Keep them fast and read-only.",
+          "do": [
+            {
+              "run": "git status --short",
+              "maxLines": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "code",
+      "type": "code",
+      "title": "Code scenes",
+      "beats": [
+        {
+          "say": "Code scenes open a real file with syntax highlighting.",
+          "do": [
+            {
+              "open": "README.md",
+              "lines": [
+                1,
+                30
+              ]
+            },
+            {
+              "focus": [
+                1,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "say": "They can also type new lines and add callouts.",
+          "do": [
+            {
+              "insert": {
+                "after": 8,
+                "code": "\nAdded live on camera."
+              }
+            },
+            {
+              "callout": {
+                "line": 10,
+                "text": "typed during the recording"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

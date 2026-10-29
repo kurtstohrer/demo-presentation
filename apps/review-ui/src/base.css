@@ -1,0 +1,7 @@
+/* Page base: background, type, links and focus ring from tokens.css. */
+html, body { background: rgb(var(--bg)); color: rgb(var(--text)); }
+body { margin: 0; font: 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+a { color: rgb(var(--link)); }
+code, kbd, pre, samp { font-family: var(--mono); }
+:focus-visible { outline: 2px solid rgb(var(--focus)); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }

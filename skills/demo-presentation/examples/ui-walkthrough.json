@@ -1,0 +1,22 @@
+{
+  "title": "Settings page walkthrough",
+  "baseUrl": "http://localhost:3000",
+  "localStorage": { "app:theme": "dark" },
+  "scenes": [
+    { "id": "settings", "type": "ui", "url": "/settings", "ready": "main h1",
+      "prepare": [
+        { "wait": 800 }
+      ],
+      "beats": [
+        { "say": "This is the settings page, running locally.", "do": [ { "chapter": { "title": "Settings", "description": "one page, three sections", "ms": 1600 } } ] },
+        { "say": "Notifications are their own section now.", "do": [ { "spotlight": { "selector": "#notifications", "ms": 900, "keep": true } } ] },
+        { "say": "Turn on the weekly digest, and it saves straight away.", "do": [
+          { "clearSpotlight": true },
+          { "click": "role=switch[name=\"Weekly digest\"]" },
+          { "waitFor": "text=Saved" }
+        ]},
+        { "say": "Search filters the list as you type.", "do": [ { "fill": { "selector": "input[type=search]", "text": "email" } } ] }
+      ]
+    }
+  ]
+}

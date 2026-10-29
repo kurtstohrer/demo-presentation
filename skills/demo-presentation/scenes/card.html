@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/skill/scenes/scene.css">
+<style>
+  .card { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; text-align: center; padding: 0 160px; }
+  .card img { max-height: 340px; max-width: 900px; object-fit: contain; }
+  .card img[hidden] { display: none; }
+  .card h1 { margin: 0; font: 800 92px/1.05 var(--display); letter-spacing: -0.02em; color: var(--fg); }
+  .card p { margin: 0; font-size: 34px; color: var(--muted); max-width: 1300px; }
+  .card p:empty { display: none; }
+  .track { width: 560px; height: 6px; border-radius: 3px; background: var(--track-gradient); }
+  .glow { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(75% 65% at 50% 38%, color-mix(in srgb, var(--accent-2) 9%, transparent), transparent); }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="card">
+  <img id="logo" alt="" hidden>
+  <h1 id="title"></h1>
+  <div class="track"></div>
+  <p id="subtitle"></p>
+</div>
+<script src="/skill/scenes/runtime.js"></script>
+<script>
+  // Title card: a project's logo, a title and a subtitle on the brand gradient.
+  // Scene fields: logo (path from the project root, or a URL), title, subtitle.
+  // Action { card: { title, subtitle, logo } } swaps any of them with a fade.
+  const $ = (id) => document.getElementById(id)
+  const card = document.querySelector('.card')
+  const src = (logo) => (/^https?:\/\//.test(logo) ? logo : '/project/' + String(logo).replace(/^\/+/, ''))
+
+  function render(spec) {
+    if (spec.logo !== undefined) {
+      $('logo').hidden = !spec.logo
+      if (spec.logo) $('logo').src = src(spec.logo)
+    }
+    if (spec.title !== undefined) $('title').textContent = spec.title
+    if (spec.subtitle !== undefined) $('subtitle').textContent = spec.subtitle
+    return $('logo').hidden ? Promise.resolve() : $('logo').decode().catch(() => {})
+  }
+
+  window.__scene.on('init', async (scene) => {
+    await render({ logo: scene.logo || '', title: scene.title || '', subtitle: scene.subtitle || '' })
+    card.classList.add('fade-in')
+  })
+  window.__scene.on('card', async (spec) => {
+    card.classList.remove('fade-in')
+    card.style.opacity = '0'
+    await window.__scene.sleep(300)
+    await render(spec)
+    card.style.opacity = ''
+    void card.offsetWidth
+    card.classList.add('fade-in')
+    await window.__scene.sleep(450)
+  })
+</script>
+</body>
+</html>

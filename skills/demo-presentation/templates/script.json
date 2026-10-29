@@ -1,0 +1,53 @@
+{
+  "title": "__TITLE__",
+  "voice": "af_heart",
+  "speed": 1.0,
+  "theme": "dark",
+  "captions": true,
+  "lexicon": { "CLI": "C L I" },
+  "scenes": [
+    {
+      "id": "concept",
+      "type": "whiteboard",
+      "title": "The idea",
+      "beats": [
+        { "say": "Here's the idea in one picture.", "do": [{ "title": "How it fits together" }] },
+        {
+          "say": "A request starts at the client, and the server answers it.",
+          "do": [
+            { "box": { "id": "client", "text": "Client", "x": 260, "y": 460, "w": 360, "h": 160 } },
+            { "box": { "id": "server", "text": "Server\nauthoritative", "x": 1300, "y": 460, "w": 360, "h": 160 } },
+            { "arrow": { "from": "client", "to": "server", "label": "request" } }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cli",
+      "type": "terminal",
+      "title": "Try it",
+      "cwd": ".",
+      "beats": [
+        { "say": "From a terminal, list what's in the repo.", "do": [{ "run": "ls", "maxLines": 14 }] }
+      ]
+    },
+    {
+      "id": "code",
+      "type": "code",
+      "title": "Where it lives",
+      "beats": [
+        { "say": "The interesting part is right here.", "do": [{ "open": "README.md", "lines": [1, 30] }, { "focus": [1, 4] }] }
+      ]
+    },
+    {
+      "id": "walkthrough",
+      "type": "ui",
+      "title": "In the app",
+      "url": "http://localhost:3000/",
+      "ready": "body",
+      "beats": [
+        { "say": "And here it is running.", "do": [{ "chapter": { "title": "Live demo" } }, { "hover": "body" }] }
+      ]
+    }
+  ]
+}

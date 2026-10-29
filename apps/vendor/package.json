@@ -1,0 +1,20 @@
+{
+  "name": "demo-presentation-vendor",
+  "private": true,
+  "type": "module",
+  "description": "Fonts and browser libraries for the demo-presentation scenes. Builds into skills/demo-presentation/vendor (shipped prebuilt).",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@fontsource/caveat": "5.2.6",
+    "@fontsource/inter": "5.2.6",
+    "@fontsource/jetbrains-mono": "5.2.6",
+    "@xterm/xterm": "5.5.0",
+    "roughjs": "4.6.6",
+    "shiki": "3.13.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/skill/scenes/scene.css">
+<style>
+  .editor { flex: 1; min-height: 0; position: relative; overflow: hidden; font-family: 'JetBrains Mono', monospace; }
+  .tabs { display: flex; height: 44px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .tab { padding: 0 22px; display: flex; align-items: center; font-size: 16px; color: var(--muted); border-right: 1px solid var(--line); }
+  .tab.active { color: var(--fg); background: var(--code-bg); box-shadow: inset 0 2px 0 var(--accent); }
+  .scroller { position: absolute; left: 0; right: 0; top: 0; transition: transform 700ms cubic-bezier(.3,.7,.2,1); padding: 18px 0 200px; }
+  .line { display: flex; height: var(--lh); line-height: var(--lh); font-size: var(--fs); white-space: pre; transition: opacity 400ms ease, background 400ms ease; }
+  .ln { width: 86px; flex: none; text-align: right; padding-right: 26px; color: var(--muted); opacity: 0.55; user-select: none; }
+  .src { flex: 1; padding-right: 40px; }
+  .dimmed .line { opacity: 0.32; }
+  .dimmed .line.lit, .line.lit { opacity: 1; }
+  .line.mark { background: color-mix(in srgb, var(--accent) 16%, transparent); box-shadow: inset 4px 0 0 var(--accent); }
+  .line.added { background: color-mix(in srgb, var(--good) 14%, transparent); box-shadow: inset 4px 0 0 var(--good); }
+  .appear { animation: appear 450ms ease-out; }
+  @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+  .caret { display: inline-block; width: 2px; height: calc(var(--lh) * 0.75); vertical-align: middle; background: var(--accent); }
+  .callout {
+    position: absolute; max-width: 620px; padding: 14px 20px; border-radius: 10px; background: var(--accent); color: #111;
+    font: 600 22px/1.3 Inter, sans-serif; box-shadow: 0 12px 30px rgba(0,0,0,.35); animation: fade-in 400ms ease-out both;
+  }
+  .callout::before { content: ''; position: absolute; left: -10px; top: 18px; border: 10px solid transparent; border-left: 0; border-right-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="scene-title"></div>
+  <div class="scene-sub"></div>
+  <div class="window">
+    <div class="tabs" id="tabs"></div>
+    <div class="editor" id="editor"><div class="scroller" id="scroller"></div></div>
+  </div>
+</div>
+<script src="/skill/vendor/shiki.js"></script>
+<script src="/skill/scenes/runtime.js"></script>
+<script>
+(() => {
+  const S = window.__scene
+  const editor = document.getElementById('editor')
+  const scroller = document.getElementById('scroller')
+  const tabs = document.getElementById('tabs')
+  let lh = 34
+  let firstLine = 1 // file line number of the first rendered row
+  let typeMs = 22
+  const callouts = []
+  let lang = 'text'
+
+  // Highlighting runs here (vendored shiki); the recorder passes plain code and a language.
+  const shikiTheme = () => (document.documentElement.dataset.theme.endsWith('light') ? 'github-light' : 'github-dark-default')
+  const highlight = (code, lang) => window.Shiki.codeToTokens(code, { lang, theme: shikiTheme() })
+
+  const rows = () => [...scroller.querySelectorAll(':scope > .line')]
+  const rowFor = (n) => rows()[n - firstLine]
+
+  function renderTokens(span, tokens) {
+    for (const t of tokens) {
+      const s = document.createElement('span')
+      s.textContent = t.content
+      if (t.color) s.style.color = t.color
+      if (t.fontStyle & 1) s.style.fontStyle = 'italic'
+      if (t.fontStyle & 2) s.style.fontWeight = '700'
+      span.appendChild(s)
+    }
+  }
+
+  function makeRow(n, tokens) {
+    const row = document.createElement('div')
+    row.className = 'line'
+    const ln = document.createElement('span')
+    ln.className = 'ln'
+    ln.textContent = n
+    const src = document.createElement('span')
+    src.className = 'src'
+    renderTokens(src, tokens || [])
+    row.append(ln, src)
+    return row
+  }
+
+  function renumber() {
+    rows().forEach((r, i) => (r.querySelector('.ln').textContent = firstLine + i))
+  }
+
+  function scrollTo(line, center = true) {
+    const visible = Math.floor(editor.clientHeight / lh)
+    const target = center ? line - Math.floor(visible / 2) + 1 : line
+    const top = Math.max(0, target - firstLine)
+    scroller.style.transform = `translateY(${-top * lh}px)`
+    return S.sleep(700)
+  }
+
+  function range(r) {
+    const [a, b] = Array.isArray(r) ? r : [r, r]
+    return [Number(a), Number(b ?? a)]
+  }
+
+  S.on('init', (scene) => {
+    const fs = scene.fontSize || 22
+    lh = Math.round(fs * 1.55)
+    typeMs = scene.typeMs ?? 22
+    document.documentElement.style.setProperty('--fs', `${fs}px`)
+    document.documentElement.style.setProperty('--lh', `${lh}px`)
+    if (scene.title) document.querySelector('.scene-title').textContent = scene.title
+    if (scene.subtitle) document.querySelector('.scene-sub').textContent = scene.subtitle
+  })
+
+  S.on('open', async (path, action) => {
+    const src = action.__file
+    lang = src.lang
+    const f = { ...(await highlight(src.code, lang)), firstLine: src.firstLine }
+    f.lines = f.tokens
+    document.documentElement.style.setProperty('--code-bg', f.bg)
+    document.querySelector('.window').style.background = f.bg
+    editor.style.color = f.fg
+    tabs.innerHTML = ''
+    const tab = document.createElement('div')
+    tab.className = 'tab active'
+    tab.textContent = path
+    tabs.appendChild(tab)
+    callouts.splice(0).forEach((c) => c.remove())
+    editor.classList.remove('dimmed')
+    scroller.style.transition = 'none'
+    scroller.style.transform = 'translateY(0)'
+    scroller.innerHTML = ''
+    firstLine = f.firstLine
+    f.lines.forEach((tokens, i) => scroller.appendChild(makeRow(firstLine + i, tokens)))
+    scroller.classList.remove('appear')
+    void scroller.offsetWidth
+    scroller.classList.add('appear')
+    scroller.style.transition = ''
+    await S.sleep(450)
+    if (action.at) await scrollTo(action.at, false)
+  })
+
+  S.on('scroll', (line) => scrollTo(Number(line)))
+
+  S.on('focus', async (r) => {
+    const [a, b] = range(r)
+    rows().forEach((row) => row.classList.remove('lit', 'mark'))
+    for (let n = a; n <= b; n++) rowFor(n)?.classList.add('lit', 'mark')
+    editor.classList.add('dimmed')
+    await scrollTo(Math.round((a + b) / 2))
+  })
+
+  S.on('highlight', async (r) => {
+    const [a, b] = range(r)
+    for (let n = a; n <= b; n++) rowFor(n)?.classList.add('mark')
+    await S.sleep(400)
+  })
+
+  S.on('unfocus', async () => {
+    editor.classList.remove('dimmed')
+    rows().forEach((row) => row.classList.remove('lit', 'mark'))
+    callouts.splice(0).forEach((c) => c.remove())
+    await S.sleep(400)
+  })
+
+  S.on('insert', async (spec, action) => {
+    // Type new lines in after `spec.after`, highlighted in the open file's language.
+    const lines = (await highlight(spec.code, spec.lang || lang)).tokens
+    let anchor = rowFor(spec.after)
+    await scrollTo(spec.after + Math.ceil(lines.length / 2))
+    for (const tokens of lines) {
+      const row = makeRow(0, [])
+      row.classList.add('added', 'lit')
+      anchor ? anchor.after(row) : scroller.appendChild(row)
+      anchor = row
+      renumber()
+      const src = row.querySelector('.src')
+      const caret = document.createElement('span')
+      caret.className = 'caret'
+      for (const t of tokens) {
+        const s = document.createElement('span')
+        if (t.color) s.style.color = t.color
+        src.appendChild(s)
+        src.appendChild(caret)
+        const text = t.content
+        const step = /^\s+$/.test(text) ? text.length : 1
+        for (let i = 0; i < text.length; i += step) {
+          s.textContent = text.slice(0, i + step)
+          await S.sleep(step > 1 ? 0 : typeMs)
+        }
+      }
+      caret.remove()
+      await S.sleep(typeMs * 4)
+    }
+  })
+
+  S.on('callout', async (spec) => {
+    const row = rowFor(spec.line)
+    if (!row) throw new Error(`callout: line ${spec.line} not rendered`)
+    const el = document.createElement('div')
+    el.className = 'callout'
+    el.textContent = spec.text
+    const src = row.querySelector('.src')
+    const textWidth = [...src.childNodes].reduce((w, n) => w + (n.getBoundingClientRect?.().width || 0), 0)
+    el.style.left = `${Math.min(86 + textWidth + 40, editor.clientWidth - 660)}px`
+    el.style.top = `${row.offsetTop - 6}px`
+    scroller.appendChild(el)
+    callouts.push(el)
+    await S.sleep(500)
+  })
+})()
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+[project]
+name = "demo-presentation"
+version = "0.2.0"
+description = "Recording (Playwright), narration (Kokoro ONNX), stitching (ffmpeg) and the review server for the demo-presentation skill"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "playwright==1.62.0",
+  "imageio-ffmpeg==0.6.0",
+  "kokoro-onnx==0.6.1",
+  "onnxruntime==1.31.1",
+  # misaki without its [en] extra: that one pulls spacy-curated-transformers, and with it torch.
+  "misaki==0.9.4",
+  "spacy==3.8.18",
+  "num2words==0.5.14",
+  "phonemizer-fork==3.3.2",
+  "espeakng-loader==0.2.4",
+  # misaki tries to `spacy download` at runtime, which fails in pip-less uv venvs.
+  "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+  "soundfile>=0.12",
+  "numpy",
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+]
+
+[tool.uv]
+package = false
+# kokoro-onnx asks for phonemizer, misaki for phonemizer-fork; both install the same package.
+override-dependencies = ["phonemizer; sys_platform == 'never'"]

@@ -1,0 +1,8 @@
+{
+  "status": "video-review",
+  "version": 2,
+  "custom": {"keep": [1, "二", null]},
+  "versions": [{"version": 1, "at": "old-1"}, {"version": 2, "at": "old-2", "custom": true}],
+  "decisions": [{"id": "dold", "scope": "beat", "key": "intro.0", "decision": "changes", "state": "open", "note": "Keep this", "version": 1, "at": "old", "author": "reviewer", "custom": 42}],
+  "comments": [{"id": "cold", "t": 1.234567, "key": "intro.0", "region": {"x": 0.1, "y": 0.2, "w": 0.3, "h": 0.4, "custom": "keep"}, "text": "Look here", "status": "open", "author": "reviewer", "version": 1, "at": "old", "custom": {"keep": true}, "replies": [{"author": "agent", "text": "Existing reply", "at": "old", "custom": 3}]}]
+}
