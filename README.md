@@ -16,19 +16,29 @@ MP4, then hands you a local review page to comment on it.
 It needs only `uv` and `git`. Python, Chromium, ffmpeg and the voice model install on first
 use (~1.3 GB, once).
 
-## Video
+## Videos
 
-**How demo-presentation works** (2:32), made with this skill from
-[`docs/videos/how-it-works/script.json`](docs/videos/how-it-works/script.json): the
-pipeline from `script.json` to MP4, the five scene types, and the review loop.
+Both were made with this skill, from the scripts in [`docs/videos/`](docs/videos/). The
+captions are a subtitle track in the downloadable MP4s on the
+[media release](https://github.com/kurtstohrer/demo-presentation/releases/tag/media),
+with `.srt` files alongside.
+
+**How demo-presentation works** (2:32): the pipeline from `script.json` to MP4, the
+scene types, and the review loop.
 
 https://github.com/user-attachments/assets/1fc93bf7-c9de-49d0-9201-6a8ad8872785
 
 0:00 What it makes · 0:18 The pipeline · 0:48 A script · 1:06 Five scene types ·
 1:28 Terminal scenes · 1:37 The review page · 2:05 The review loop · 2:18 Recap
 
-Captions: download the [MP4](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.mp4) (it has a subtitle track) or the
-[`.srt`](https://github.com/kurtstohrer/demo-presentation/releases/download/media/how-it-works.srt).
+**Using demo-presentation, step by step** (4:03): install, set up `.demo/`, ask your
+agent, review in the browser, publish, troubleshoot.
+
+https://github.com/user-attachments/assets/85b8a622-e236-4cd8-8e7d-89e97c4f0a9b
+
+0:00 Seven steps · 0:08 Install · 0:23 Set up .demo/ · 0:49 Ask for a video ·
+1:00 What the agent does · 1:55 Review · 3:29 Publish (optional) · 3:39 Troubleshooting ·
+3:55 Recap
 
 ## Install
 
