@@ -1,6 +1,6 @@
 {
   "name": "demo-presentation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Narrated demo videos from a script: hand-drawn whiteboard, real terminal, real code and live Playwright UI scenes, Kokoro narration, captions and chapters, with a local review UI.",
   "author": { "name": "Kurt Stohrer" },
   "homepage": "https://github.com/kurtstohrer/demo-presentation",
